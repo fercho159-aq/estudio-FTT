@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mnemo — Estudio con Tarjetas</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F5F0E6;
+      --bg-surface: #FFFDF7;
+      --bg-elevated: #FFFFFF;
+      --text: #2A2520;
+      --text-secondary: #7A746C;
+      --text-tertiary: #ADA69C;
+      --accent: #C25E30;
+      --accent-hover: #A84D24;
+      --accent-soft: rgba(194,94,48,0.08);
+      --success: #5A8A62;
+      --success-soft: rgba(90,138,98,0.1);
+      --warning: #C4982A;
+      --warning-soft: rgba(196,152,42,0.1);
+      --danger: #C4453E;
+      --danger-soft: rgba(196,69,62,0.08);
+      --border: #E5DFD5;
+      --border-light: #F0EBE3;
+      --shadow-sm: 0 1px 3px rgba(42,37,32,0.06);
+      --shadow: 0 4px 16px rgba(42,37,32,0.08);
+      --shadow-lg: 0 12px 40px rgba(42,37,32,0.12);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-xs: 6px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #161412;
+      --bg-surface: #211E1B;
+      --bg-elevated: #2C2824;
+      --text: #EAE4DA;
+      --text-secondary: #9A948C;
+      --text-tertiary: #5A544C;
+      --accent: #E8764A;
+      --accent-hover: #F08860;
+      --accent-soft: rgba(232,118,74,0.12);
+      --success: #70A878;
+      --success-soft: rgba(112,168,120,0.12);
+      --warning: #D4A843;
+      --warning-soft: rgba(212,168,67,0.12);
+      --danger: #E4655E;
+      --danger-soft: rgba(228,101,94,0.1);
+      --border: #3A3530;
+      --border-light: #2A2622;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.15);
+      --shadow: 0 4px 16px rgba(0,0,0,0.2);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.3);
+    }
+
+    body {
+      font-family: 'Work Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      transition: background 0.4s, color 0.3s;
+    }
+
+    /* ── Typography ── */
+    .font-display { font-family: 'Fraunces', Georgia, serif; }
+    .text-secondary { color: var(--text-secondary); }
+    .text-tertiary { color: var(--text-tertiary); }
+
+    /* ── Layout ── */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ── */
+    .header {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      position: sticky; top: 0; z-index: 50;
+      transition: background 0.4s, border-color 0.3s;
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 22px; font-weight: 700;
+      font-style: italic;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .logo span { font-size: 20px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+
+    .theme-toggle {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; border: 1px solid var(--border);
+      background: var(--bg); cursor: pointer;
+      transition: all 0.2s; font-size: 18px;
+    }
+    .theme-toggle:hover { background: var(--border-light); transform: scale(1.05); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 20px; border-radius: var(--radius-sm);
+      font-family: 'Work Sans', sans-serif; font-weight: 600; font-size: 14px;
+      border: none; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--text-tertiary); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); padding: 8px 12px; }
+    .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
+    .btn-danger { background: var(--danger-soft); color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: var(--radius-xs); }
+    .btn-icon {
+      width: 36px; height: 36px; padding: 0;
+      border-radius: var(--radius-xs);
+      background: transparent; color: var(--text-tertiary);
+      border: none; cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .btn-icon:hover { background: var(--border-light); color: var(--text); }
+
+    /* ── Inputs ── */
+    .input, .textarea {
+      width: 100%; padding: 12px 16px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--bg); color: var(--text);
+      font-family: 'Work Sans', sans-serif; font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .input:focus, .textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .input::placeholder, .textarea::placeholder { color: var(--text-tertiary); }
+    .textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── Page Header ── */
+    .page-header {
+      padding: 32px 0 24px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .page-title {
+      font-family: 'Fraunces', serif;
+      font-size: 32px; font-weight: 700;
+      letter-spacing: -0.5px; line-height: 1.2;
+    }
+    .page-subtitle { color: var(--text-secondary); margin-top: 4px; font-size: 15px; }
+
+    /* ── Dashboard Deck Grid ── */
+    .deck-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px; padding-bottom: 40px;
+    }
+    .deck-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .deck-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent);
+      opacity: 0; transition: opacity 0.25s;
+    }
+    .deck-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--accent);
+    }
+    .deck-card:hover::before { opacity: 1; }
+    .deck-emoji { font-size: 36px; margin-bottom: 12px; display: block; }
+    .deck-name {
+      font-family: 'Fraunces', serif;
+      font-size: 19px; font-weight: 600;
+      margin-bottom: 4px; line-height: 1.3;
+    }
+    .deck-meta { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+    .deck-stats {
+      display: flex; gap: 12px; font-size: 12px; font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .deck-stat { display: flex; align-items: center; gap: 4px; }
+    .stat-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .dot-due { background: var(--warning); }
+    .dot-learning { background: var(--accent); }
+    .dot-mastered { background: var(--success); }
+    .progress-bar {
+      height: 4px; border-radius: 2px;
+      background: var(--border-light);
+      overflow: hidden; display: flex;
+    }
+    .progress-segment { height: 100%; transition: width 0.4s ease; }
+    .progress-mastered { background: var(--success); }
+    .progress-learning { background: var(--accent); }
+
+    /* ── Deck Detail ── */
+    .deck-hero {
+      display: flex; align-items: center; gap: 20px;
+      padding: 28px 0;
+    }
+    .deck-hero-emoji {
+      font-size: 52px;
+      width: 80px; height: 80px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent-soft);
+      border-radius: var(--radius);
+    }
+    .deck-hero-info { flex: 1; }
+    .deck-hero-name {
+      font-family: 'Fraunces', serif;
+      font-size: 28px; font-weight: 700;
+      line-height: 1.2;
+    }
+    .deck-hero-count { color: var(--text-secondary); font-size: 15px; margin-top: 2px; }
+    .deck-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .stat-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 16px; text-align: center;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 28px; font-weight: 700; line-height: 1;
+    }
+    .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-due .stat-value { color: var(--warning); }
+    .stat-learning .stat-value { color: var(--accent); }
+    .stat-mastered .stat-value { color: var(--success); }
+
+    .card-list { display: flex; flex-direction: column; gap: 2px; padding-bottom: 40px; }
+    .card-list-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-list-title { font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+
+    .card-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .card-item:hover { border-color: var(--border); box-shadow: var(--shadow-sm); }
+    .card-front-preview {
+      flex: 1; font-size: 15px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-back-preview {
+      flex: 1; font-size: 13px; color: var(--text-secondary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 20px; white-space: nowrap;
+    }
+    .badge-new { background: var(--accent-soft); color: var(--accent); }
+    .badge-learning { background: var(--warning-soft); color: var(--warning); }
+    .badge-mastered { background: var(--success-soft); color: var(--success); }
+    .card-item-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.2s; }
+    .card-item:hover .card-item-actions { opacity: 1; }
+
+    /* ── Study Mode ── */
+    .study-container {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 32px 0 40px; min-height: calc(100vh - 80px);
+    }
+    .study-progress {
+      width: 100%; max-width: 500px; margin-bottom: 32px;
+    }
+    .study-progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--text-secondary); font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .study-progress-bar {
+      height: 6px; border-radius: 3px;
+      background: var(--border-light); overflow: hidden;
+    }
+    .study-progress-fill {
+      height: 100%; border-radius: 3px;
+      background: var(--accent);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .flashcard {
+      perspective: 1200px;
+      width: 100%; max-width: 500px; height: 320px;
+      cursor: pointer; margin-bottom: 32px;
+    }
+    .flashcard-inner {
+      width: 100%; height: 100%;
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 32px;
+      border-radius: var(--radius);
+      text-align: center;
+      overflow-y: auto;
+    }
+    .flashcard-front {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-lg);
+    }
+    .flashcard-back {
+      transform: rotateY(180deg);
+      background: var(--accent-soft);
+      border: 1.5px solid var(--accent);
+      box-shadow: var(--shadow-lg);
+    }
+    .flashcard-text {
+      font-family: 'Fraunces', serif;
+      font-size: 24px; font-weight: 500;
+      line-height: 1.4;
+    }
+    .flashcard-hint {
+      position: absolute; bottom: 20px;
+      font-size: 12px; color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .rating-buttons {
+      display: flex; gap: 12px; width: 100%; max-width: 500px;
+      animation: fadeUp 0.3s ease;
+    }
+    .rating-btn {
+      flex: 1; padding: 16px 12px;
+      border-radius: var(--radius-sm); border: 2px solid;
+      cursor: pointer; text-align: center;
+      font-family: 'Work Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .rating-btn:hover { transform: translateY(-2px); }
+    .rating-btn:active { transform: scale(0.97); }
+    .rating-name { font-weight: 700; font-size: 15px; display: block; }
+    .rating-key { font-size: 11px; opacity: 0.6; margin-top: 2px; display: block; }
+    .rating-hard {
+      border-color: var(--danger);
+      background: var(--danger-soft); color: var(--danger);
+    }
+    .rating-hard:hover { background: var(--danger); color: #fff; }
+    .rating-normal {
+      border-color: var(--warning);
+      background: var(--warning-soft); color: var(--warning);
+    }
+    .rating-normal:hover { background: var(--warning); color: #fff; }
+    .rating-easy {
+      border-color: var(--success);
+      background: var(--success-soft); color: var(--success);
+    }
+    .rating-easy:hover { background: var(--success); color: #fff; }
+
+    /* ── Results ── */
+    .results {
+      text-align: center; padding: 60px 0;
+      animation: fadeUp 0.5s ease;
+    }
+    .results-emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+    .results-title {
+      font-family: 'Fraunces', serif;
+      font-size: 32px; font-weight: 700; margin-bottom: 8px;
+    }
+    .results-subtitle { color: var(--text-secondary); font-size: 16px; margin-bottom: 32px; }
+    .results-stats {
+      display: flex; justify-content: center; gap: 32px;
+      margin-bottom: 40px;
+    }
+    .results-stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 36px; font-weight: 700;
+    }
+    .results-stat-label { font-size: 13px; color: var(--text-secondary); }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 24px;
+      animation: fadeIn 0.15s ease;
+      backdrop-filter: blur(4px);
+    }
+    .modal {
+      background: var(--bg-surface);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 100%; max-width: 460px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.25s ease;
+    }
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-size: 22px; font-weight: 700;
+      margin-bottom: 24px;
+    }
+    .modal-actions {
+      display: flex; justify-content: flex-end; gap: 10px;
+      margin-top: 24px;
+    }
+    .emoji-grid {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    }
+    .emoji-option {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; border-radius: var(--radius-xs);
+      border: 2px solid transparent;
+      cursor: pointer; transition: all 0.15s;
+      background: var(--bg);
+    }
+    .emoji-option:hover { border-color: var(--border); transform: scale(1.1); }
+    .emoji-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center; padding: 80px 20px;
+    }
+    .empty-icon { font-size: 56px; margin-bottom: 16px; display: block; opacity: 0.8; }
+    .empty-title {
+      font-family: 'Fraunces', serif;
+      font-size: 22px; font-weight: 600; margin-bottom: 8px;
+    }
+    .empty-text { color: var(--text-secondary); font-size: 15px; margin-bottom: 24px; max-width: 360px; margin-left: auto; margin-right: auto; }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      text-decoration: none; cursor: pointer;
+      padding: 4px 0; margin-bottom: 8px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* ── Animations ── */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-in { animation: fadeUp 0.35s ease backwards; }
+    .stagger-1 { animation-delay: 0.03s; }
+    .stagger-2 { animation-delay: 0.06s; }
+    .stagger-3 { animation-delay: 0.09s; }
+    .stagger-4 { animation-delay: 0.12s; }
+    .stagger-5 { animation-delay: 0.15s; }
+    .stagger-6 { animation-delay: 0.18s; }
+    .stagger-7 { animation-delay: 0.21s; }
+    .stagger-8 { animation-delay: 0.24s; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg);
+      padding: 12px 24px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 200;
+      animation: fadeUp 0.3s ease, fadeIn 0.3s ease;
+    }
+    .toast.hide { opacity: 0; transition: opacity 0.3s; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .page-title { font-size: 26px; }
+      .deck-grid { grid-template-columns: 1fr; }
+      .stat-cards { grid-template-columns: 1fr; gap: 8px; }
+      .flashcard { height: 280px; }
+      .flashcard-text { font-size: 20px; }
+      .rating-buttons { flex-direction: column; }
+      .deck-hero { flex-direction: column; text-align: center; }
+      .deck-actions { justify-content: center; }
+      .results-stats { flex-direction: column; gap: 16px; }
+      .modal { padding: 24px; }
+      .card-item-actions { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast-root"></div>
+
+<script>
+// ── State ──
+let state = {
+  view: 'dashboard',
+  decks: [],
+  currentDeck: null,
+  cards: [],
+  studyCards: [],
+  studyIndex: 0,
+  flipped: false,
+  results: [],
+  modal: null,
+  darkMode: localStorage.getItem('mnemo-dark') === 'true'
+};
+
+const EMOJIS = ['📚','📖','🧠','💡','🌍','🔬','🧪','🎨','🎵','🔢','📐','🌿','💻','🗣️','✏️','🏛️','⚡','🧬','📊','🎯','🏥','⚖️','🎭','🌊','🚀','🎓','📝','🔤','🗺️','🧮'];
+
+// ── API ──
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch('/api' + path, opts);
+  if (!res.ok) throw new Error((await res.json()).error || 'Error de red');
+  return res.json();
+}
+
+// ── Actions ──
+async function loadDecks() {
+  state.decks = await api('GET', '/decks');
+  render();
+}
+
+async function openDeck(id) {
+  state.currentDeck = state.decks.find(d => d.id === id);
+  state.cards = await api('GET', `/decks/${id}/cards`);
+  state.view = 'deck';
+  render();
+  window.scrollTo(0, 0);
+}
+
+async function startStudy(deckId) {
+  const cards = await api('GET', `/decks/${deckId}/study`);
+  if (cards.length === 0) {
+    toast('No hay tarjetas pendientes por repasar');
+    return;
+  }
+  state.studyCards = cards;
+  state.studyIndex = 0;
+  state.flipped = false;
+  state.results = [];
+  state.view = 'study';
+  render();
+}
+
+async function rateCard(rating) {
+  const card = state.studyCards[state.studyIndex];
+  await api('POST', `/cards/${card.id}/review`, { rating });
+  state.results.push({ card, rating });
+  state.studyIndex++;
+  state.flipped = false;
+  if (state.studyIndex >= state.studyCards.length) {
+    state.view = 'results';
+  }
+  render();
+}
+
+function flipCard() {
+  if (state.view !== 'study') return;
+  state.flipped = !state.flipped;
+  render();
+}
+
+async function saveDeck(name, emoji) {
+  if (state.modal.mode === 'create') {
+    await api('POST', '/decks', { name, emoji });
+  } else {
+    await api('PUT', `/decks/${state.modal.deckId}`, { name, emoji });
+  }
+  state.modal = null;
+  await loadDecks();
+  if (state.view === 'deck' && state.currentDeck) {
+    state.currentDeck = state.decks.find(d => d.id === state.currentDeck.id);
+  }
+  render();
+}
+
+async function deleteDeck(id) {
+  await api('DELETE', `/decks/${id}`);
+  state.modal = null;
+  state.view = 'dashboard';
+  await loadDecks();
+}
+
+async function saveCard(front, back) {
+  const deckId = state.currentDeck.id;
+  if (state.modal.mode === 'createCard') {
+    await api('POST', `/decks/${deckId}/cards`, { front, back });
+  } else {
+    await api('PUT', `/cards/${state.modal.cardId}`, { front, back });
+  }
+  state.modal = null;
+  state.cards = await api('GET', `/decks/${deckId}/cards`);
+  await loadDecks();
+  if (state.currentDeck) {
+    state.currentDeck = state.decks.find(d => d.id === state.currentDeck.id);
+  }
+  render();
+}
+
+async function deleteCard(id) {
+  await api('DELETE', `/cards/${id}`);
+  state.modal = null;
+  state.cards = await api('GET', `/decks/${state.currentDeck.id}/cards`);
+  await loadDecks();
+  if (state.currentDeck) {
+    state.currentDeck = state.decks.find(d => d.id === state.currentDeck.id);
+  }
+  render();
+}
+
+function goHome() {
+  state.view = 'dashboard';
+  state.currentDeck = null;
+  state.cards = [];
+  render();
+  window.scrollTo(0, 0);
+}
+
+function toggleDark() {
+  state.darkMode = !state.darkMode;
+  localStorage.setItem('mnemo-dark', state.darkMode);
+  applyTheme();
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', state.darkMode ? 'dark' : 'light');
+}
+
+function toast(msg) {
+  const root = document.getElementById('toast-root');
+  root.innerHTML = `<div class="toast">${msg}</div>`;
+  setTimeout(() => { const t = root.querySelector('.toast'); if (t) t.classList.add('hide'); }, 2500);
+  setTimeout(() => { root.innerHTML = ''; }, 3000);
+}
+
+// ── Render ──
+function render() {
+  const app = document.getElementById('app');
+  let html = renderHeader();
+  html += '<main class="container">';
+  switch (state.view) {
+    case 'dashboard': html += renderDashboard(); break;
+    case 'deck': html += renderDeckDetail(); break;
+    case 'study': html += renderStudy(); break;
+    case 'results': html += renderResults(); break;
+  }
+  html += '</main>';
+  if (state.modal) html += renderModal();
+  app.innerHTML = html;
+}
+
+function renderHeader() {
+  const showBack = state.view !== 'dashboard';
+  return `
+    <header class="header">
+      <div class="container header-inner">
+        <div class="logo" data-action="home">
+          <span>🧠</span> Mnemo
+        </div>
+        <div class="header-actions">
+          <button class="theme-toggle" data-action="toggleDark" title="Cambiar tema">
+            ${state.darkMode ? '☀️' : '🌙'}
+          </button>
+        </div>
+      </div>
+    </header>`;
+}
+
+function renderDashboard() {
+  if (state.decks.length === 0) {
+    return `
+      <div class="empty-state animate-in">
+        <span class="empty-icon">📇</span>
+        <h2 class="empty-title">Tu colección está vacía</h2>
+        <p class="empty-text">Crea tu primer mazo de tarjetas para empezar a estudiar con repetición espaciada.</p>
+        <button class="btn btn-primary" data-action="showCreateDeck">Crear primer mazo</button>
+      </div>`;
+  }
+  let html = `
+    <div class="page-header animate-in">
+      <div>
+        <h1 class="page-title">Mis Mazos</h1>
+        <p class="page-subtitle">${state.decks.length} mazo${state.decks.length !== 1 ? 's' : ''} · ${state.decks.reduce((s,d) => s + d.card_count, 0)} tarjetas</p>
+      </div>
+      <button class="btn btn-primary" data-action="showCreateDeck">+ Nuevo mazo</button>
+    </div>
+    <div class="deck-grid">`;
+  state.decks.forEach((d, i) => {
+    const total = d.card_count || 1;
+    const masteredPct = (d.mastered_count / total * 100).toFixed(0);
+    const learningPct = (d.learning_count / total * 100).toFixed(0);
+    html += `
+      <div class="deck-card animate-in stagger-${i + 1}" data-action="openDeck" data-id="${d.id}">
+        <span class="deck-emoji">${d.emoji}</span>
+        <div class="deck-name">${esc(d.name)}</div>
+        <div class="deck-meta">${d.card_count} tarjeta${d.card_count !== 1 ? 's' : ''}</div>
+        <div class="deck-stats">
+          ${d.due_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-due"></span>${d.due_count} pendiente${d.due_count !== 1 ? 's' : ''}</span>` : ''}
+          ${d.learning_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-learning"></span>${d.learning_count} aprendiendo</span>` : ''}
+          ${d.mastered_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-mastered"></span>${d.mastered_count} dominada${d.mastered_count !== 1 ? 's' : ''}</span>` : ''}
+        </div>
+        <div class="progress-bar">
+          <div class="progress-segment progress-mastered" style="width:${masteredPct}%"></div>
+          <div class="progress-segment progress-learning" style="width:${learningPct}%"></div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderDeckDetail() {
+  const d = state.currentDeck;
+  if (!d) return '';
+  const newCount = d.card_count - d.mastered_count - d.learning_count;
+
+  let html = `
+    <div class="animate-in">
+      <a class="back-link" data-action="home">← Mis Mazos</a>
+      <div class="deck-hero">
+        <div class="deck-hero-emoji">${d.emoji}</div>
+        <div class="deck-hero-info">
+          <h1 class="deck-hero-name">${esc(d.name)}</h1>
+          <p class="deck-hero-count">${d.card_count} tarjeta${d.card_count !== 1 ? 's' : ''}</p>
+        </div>
+        <div class="deck-actions">
+          <button class="btn btn-primary" data-action="startStudy" data-id="${d.id}" ${d.due_count === 0 ? '' : ''}>
+            ${d.due_count > 0 ? `Estudiar (${d.due_count})` : 'Estudiar'}
+          </button>
+          <button class="btn-icon" data-action="showEditDeck" data-id="${d.id}" title="Editar">✏️</button>
+          <button class="btn-icon" data-action="showDeleteDeck" data-id="${d.id}" title="Eliminar">🗑️</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-cards animate-in stagger-1">
+      <div class="stat-card stat-due">
+        <div class="stat-value">${d.due_count}</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+      <div class="stat-card stat-learning">
+        <div class="stat-value">${d.learning_count}</div>
+        <div class="stat-label">Aprendiendo</div>
+      </div>
+      <div class="stat-card stat-mastered">
+        <div class="stat-value">${d.mastered_count}</div>
+        <div class="stat-label">Dominadas</div>
+      </div>
+    </div>`;
+
+  html += `
+    <div class="card-list animate-in stagger-2">
+      <div class="card-list-header">
+        <span class="card-list-title">Tarjetas</span>
+        <button class="btn btn-sm btn-secondary" data-action="showCreateCard">+ Añadir</button>
+      </div>`;
+
+  if (state.cards.length === 0) {
+    html += `
+      <div class="empty-state" style="padding:40px 20px">
+        <span class="empty-icon" style="font-size:40px">✨</span>
+        <h2 class="empty-title" style="font-size:18px">Sin tarjetas aún</h2>
+        <p class="empty-text" style="font-size:14px">Añade tarjetas para empezar a estudiar este mazo.</p>
+        <button class="btn btn-primary btn-sm" data-action="showCreateCard">Crear tarjeta</button>
+      </div>`;
+  } else {
+    state.cards.forEach(c => {
+      let badge = '';
+      if (c.review_count === 0) badge = '<span class="card-badge badge-new">Nueva</span>';
+      else if (c.interval_days >= 21) badge = '<span class="card-badge badge-mastered">Dominada</span>';
+      else badge = '<span class="card-badge badge-learning">Aprendiendo</span>';
+
+      html += `
+        <div class="card-item">
+          <div class="card-front-preview">${esc(c.front)}</div>
+          <div class="card-back-preview">${esc(c.back)}</div>
+          ${badge}
+          <div class="card-item-actions">
+            <button class="btn-icon" data-action="showEditCard" data-id="${c.id}" title="Editar">✏️</button>
+            <button class="btn-icon" data-action="showDeleteCard" data-id="${c.id}" title="Eliminar">🗑️</button>
+          </div>
+        </div>`;
+    });
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderStudy() {
+  const total = state.studyCards.length;
+  const idx = state.studyIndex;
+  const card = state.studyCards[idx];
+  const pct = ((idx) / total * 100).toFixed(0);
+
+  return `
+    <div class="study-container">
+      <div class="study-progress animate-in">
+        <div class="study-progress-label">
+          <span>Tarjeta ${idx + 1} de ${total}</span>
+          <span>${pct}% completado</span>
+        </div>
+        <div class="study-progress-bar">
+          <div class="study-progress-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+
+      <div class="flashcard ${state.flipped ? 'flipped' : ''}" data-action="flip">
+        <div class="flashcard-inner">
+          <div class="flashcard-face flashcard-front">
+            <div class="flashcard-text">${esc(card.front)}</div>
+            <div class="flashcard-hint">Clic o Espacio para voltear</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="flashcard-text">${esc(card.back)}</div>
+          </div>
+        </div>
+      </div>
+
+      ${state.flipped ? `
+        <div class="rating-buttons">
+          <button class="rating-btn rating-hard" data-action="rate" data-rating="1">
+            <span class="rating-name">Difícil</span>
+            <span class="rating-key">1</span>
+          </button>
+          <button class="rating-btn rating-normal" data-action="rate" data-rating="2">
+            <span class="rating-name">Normal</span>
+            <span class="rating-key">2</span>
+          </button>
+          <button class="rating-btn rating-easy" data-action="rate" data-rating="3">
+            <span class="rating-name">Fácil</span>
+            <span class="rating-key">3</span>
+          </button>
+        </div>` : ''}
+
+      <button class="btn btn-ghost" data-action="exitStudy" style="margin-top:24px">Salir del estudio</button>
+    </div>`;
+}
+
+function renderResults() {
+  const total = state.results.length;
+  const hard = state.results.filter(r => r.rating === 1).length;
+  const normal = state.results.filter(r => r.rating === 2).length;
+  const easy = state.results.filter(r => r.rating === 3).length;
+
+  const messages = [
+    '¡Excelente sesión de estudio!',
+    '¡Buen trabajo, sigue así!',
+    '¡Tu memoria mejora cada día!',
+    '¡Increíble esfuerzo!'
+  ];
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+
+  return `
+    <div class="results">
+      <span class="results-emoji">🎉</span>
+      <h1 class="results-title">${msg}</h1>
+      <p class="results-subtitle">Repasaste ${total} tarjeta${total !== 1 ? 's' : ''} en esta sesión</p>
+      <div class="results-stats">
+        <div>
+          <div class="results-stat-value" style="color:var(--danger)">${hard}</div>
+          <div class="results-stat-label">Difícil</div>
+        </div>
+        <div>
+          <div class="results-stat-value" style="color:var(--warning)">${normal}</div>
+          <div class="results-stat-label">Normal</div>
+        </div>
+        <div>
+          <div class="results-stat-value" style="color:var(--success)">${easy}</div>
+          <div class="results-stat-label">Fácil</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" data-action="backToDeck">Volver al mazo</button>
+        <button class="btn btn-secondary" data-action="home">Ir al inicio</button>
+      </div>
+    </div>`;
+}
+
+function renderModal() {
+  const m = state.modal;
+  let content = '';
+
+  if (m.type === 'deck') {
+    const isEdit = m.mode === 'edit';
+    content = `
+      <h2 class="modal-title">${isEdit ? 'Editar mazo' : 'Nuevo mazo'}</h2>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Nombre</label>
+        <input class="input" id="modal-name" placeholder="Ej: Vocabulario en Inglés" value="${isEdit ? esc(m.name) : ''}" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icono</label>
+        <div class="emoji-grid">
+          ${EMOJIS.map(e => `<div class="emoji-option ${(m.emoji || '📚') === e ? 'selected' : ''}" data-action="selectEmoji" data-emoji="${e}">${e}</div>`).join('')}
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-action="closeModal">Cancelar</button>
+        <button class="btn btn-primary" data-action="submitDeck">${isEdit ? 'Guardar' : 'Crear'}</button>
+      </div>`;
+  } else if (m.type === 'card') {
+    const isEdit = m.mode === 'editCard';
+    content = `
+      <h2 class="modal-title">${isEdit ? 'Editar tarjeta' : 'Nueva tarjeta'}</h2>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Frente (pregunta)</label>
+        <textarea class="textarea" id="modal-front" placeholder="Ej: ¿Cuál es la capital de Francia?">${isEdit ? esc(m.front) : ''}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reverso (respuesta)</label>
+        <textarea class="textarea" id="modal-back" placeholder="Ej: París">${isEdit ? esc(m.back) : ''}</textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-action="closeModal">Cancelar</button>
+        <button class="btn btn-primary" data-action="submitCard">${isEdit ? 'Guardar' : 'Crear'}</button>
+      </div>`;
+  } else if (m.type === 'confirmDelete') {
+    content = `
+      <h2 class="modal-title">Confirmar eliminación</h2>
+      <p style="color:var(--text-secondary);margin-bottom:8px">${m.message}</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-action="closeModal">Cancelar</button>
+        <button class="btn btn-danger" data-action="confirmDelete">Eliminar</button>
+      </div>`;
+  }
+
+  return `
+    <div class="modal-overlay" data-action="overlayClick">
+      <div class="modal" onclick="event.stopPropagation()">
+        ${content}
+      </div>
+    </div>`;
+}
+
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Event Handling ──
+document.getElementById('app').addEventListener('click', async (e) => {
+  const target = e.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+  const id = target.dataset.id;
+
+  switch (action) {
+    case 'home': goHome(); break;
+    case 'toggleDark': toggleDark(); break;
+    case 'openDeck': await openDeck(id); break;
+    case 'startStudy': await startStudy(id); break;
+    case 'flip': flipCard(); break;
+    case 'rate': await rateCard(parseInt(target.dataset.rating)); break;
+    case 'exitStudy':
+      if (state.currentDeck) await openDeck(state.currentDeck.id);
+      else goHome();
+      break;
+    case 'backToDeck':
+      if (state.currentDeck) await openDeck(state.currentDeck.id);
+      else goHome();
+      break;
+
+    // Deck modals
+    case 'showCreateDeck':
+      state.modal = { type: 'deck', mode: 'create', emoji: '📚' };
+      render();
+      setTimeout(() => document.getElementById('modal-name')?.focus(), 50);
+      break;
+    case 'showEditDeck':
+      const deck = state.decks.find(d => d.id === id) || state.currentDeck;
+      state.modal = { type: 'deck', mode: 'edit', deckId: deck.id, name: deck.name, emoji: deck.emoji };
+      render();
+      setTimeout(() => document.getElementById('modal-name')?.focus(), 50);
+      break;
+    case 'showDeleteDeck':
+      state.modal = { type: 'confirmDelete', target: 'deck', targetId: id || state.currentDeck?.id, message: '¿Estás seguro de que quieres eliminar este mazo y todas sus tarjetas? Esta acción no se puede deshacer.' };
+      render();
+      break;
+    case 'selectEmoji':
+      if (state.modal) { state.modal.emoji = target.dataset.emoji; render(); }
+      break;
+    case 'submitDeck': {
+      const name = document.getElementById('modal-name')?.value.trim();
+      if (!name) { toast('Escribe un nombre para el mazo'); return; }
+      await saveDeck(name, state.modal.emoji || '📚');
+      break;
+    }
+
+    // Card modals
+    case 'showCreateCard':
+      state.modal = { type: 'card', mode: 'createCard' };
+      render();
+      setTimeout(() => document.getElementById('modal-front')?.focus(), 50);
+      break;
+    case 'showEditCard': {
+      const card = state.cards.find(c => c.id === id);
+      state.modal = { type: 'card', mode: 'editCard', cardId: id, front: card.front, back: card.back };
+      render();
+      setTimeout(() => document.getElementById('modal-front')?.focus(), 50);
+      break;
+    }
+    case 'showDeleteCard':
+      state.modal = { type: 'confirmDelete', target: 'card', targetId: id, message: '¿Eliminar esta tarjeta?' };
+      render();
+      break;
+    case 'submitCard': {
+      const front = document.getElementById('modal-front')?.value.trim();
+      const back = document.getElementById('modal-back')?.value.trim();
+      if (!front || !back) { toast('Completa ambos campos'); return; }
+      await saveCard(front, back);
+      break;
+    }
+
+    // Delete confirm
+    case 'confirmDelete':
+      if (state.modal.target === 'deck') await deleteDeck(state.modal.targetId);
+      else if (state.modal.target === 'card') await deleteCard(state.modal.targetId);
+      break;
+
+    // Modal
+    case 'closeModal': state.modal = null; render(); break;
+    case 'overlayClick': state.modal = null; render(); break;
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (state.modal) {
+    if (e.key === 'Escape') { state.modal = null; render(); }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      const action = state.modal.type === 'deck' ? 'submitDeck' : state.modal.type === 'card' ? 'submitCard' : null;
+      if (action) {
+        e.preventDefault();
+        document.querySelector(`[data-action="${action}"]`)?.click();
+      }
+    }
+    return;
+  }
+
+  if (state.view === 'study') {
+    if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); flipCard(); }
+    if (state.flipped) {
+      if (e.key === '1') rateCard(1);
+      if (e.key === '2') rateCard(2);
+      if (e.key === '3') rateCard(3);
+    }
+    if (e.key === 'Escape') {
+      if (state.currentDeck) openDeck(state.currentDeck.id);
+      else goHome();
+    }
+  }
+});
+
+// ── Init ──
+applyTheme();
+loadDecks();
+</script>
+</body>
+</html>
