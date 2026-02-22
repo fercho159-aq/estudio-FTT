@@ -1,5 +1,7 @@
 const express = require('express');
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 
@@ -20,6 +22,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+const JWT_SECRET = process.env.JWT_SECRET || 'mnemo-dev-fallback';
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -29,9 +32,67 @@ const h = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(er
   res.status(500).json({ error: err.message });
 });
 
-// ── Decks ──
+// ── Auth middleware ──
 
-app.get('/api/decks', h(async (req, res) => {
+function auth(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autorizado' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (e) {
+    res.status(401).json({ error: 'Sesión expirada' });
+  }
+}
+
+// ── Auth routes ──
+
+app.post('/api/register', h(async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: 'Completa todos los campos' });
+  if (username.length < 3) return res.status(400).json({ error: 'El usuario debe tener al menos 3 caracteres' });
+  if (password.length < 4) return res.status(400).json({ error: 'La contraseña debe tener al menos 4 caracteres' });
+
+  const exists = await pool.query('SELECT id FROM users WHERE username = $1', [username.toLowerCase().trim()]);
+  if (exists.rows.length > 0) return res.status(400).json({ error: 'Ese usuario ya existe' });
+
+  const hash = await bcrypt.hash(password, 10);
+  const { rows: [user] } = await pool.query(
+    'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
+    [username.toLowerCase().trim(), hash]
+  );
+
+  // Claim existing unassigned decks for the first user
+  await pool.query('UPDATE decks SET user_id = $1 WHERE user_id IS NULL', [user.id]);
+
+  const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '90d' });
+  res.json({ token, user: { id: user.id, username: user.username } });
+}));
+
+app.post('/api/login', h(async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: 'Completa todos los campos' });
+
+  const { rows: [user] } = await pool.query(
+    'SELECT id, username, password_hash FROM users WHERE username = $1',
+    [username.toLowerCase().trim()]
+  );
+  if (!user) return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+
+  const valid = await bcrypt.compare(password, user.password_hash);
+  if (!valid) return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+
+  const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '90d' });
+  res.json({ token, user: { id: user.id, username: user.username } });
+}));
+
+app.get('/api/me', auth, h(async (req, res) => {
+  res.json({ id: req.user.id, username: req.user.username });
+}));
+
+// ── Decks (protected) ──
+
+app.get('/api/decks', auth, h(async (req, res) => {
   const { rows } = await pool.query(`
     SELECT d.*,
       COUNT(c.id)::int AS card_count,
@@ -40,38 +101,44 @@ app.get('/api/decks', h(async (req, res) => {
       COUNT(CASE WHEN c.review_count > 0 AND c.interval_days < 21 THEN 1 END)::int AS learning_count
     FROM decks d
     LEFT JOIN cards c ON c.deck_id = d.id
+    WHERE d.user_id = $1
     GROUP BY d.id
     ORDER BY d.created_at DESC
-  `);
+  `, [req.user.id]);
   res.json(rows);
 }));
 
-app.post('/api/decks', h(async (req, res) => {
+app.post('/api/decks', auth, h(async (req, res) => {
   const { name, emoji } = req.body;
   const { rows } = await pool.query(
-    'INSERT INTO decks (name, emoji) VALUES ($1, $2) RETURNING *',
-    [name, emoji || '📚']
+    'INSERT INTO decks (name, emoji, user_id) VALUES ($1, $2, $3) RETURNING *',
+    [name, emoji || '📚', req.user.id]
   );
   res.json(rows[0]);
 }));
 
-app.put('/api/decks/:id', h(async (req, res) => {
+app.put('/api/decks/:id', auth, h(async (req, res) => {
   const { name, emoji } = req.body;
   const { rows } = await pool.query(
-    'UPDATE decks SET name = $1, emoji = $2 WHERE id = $3 RETURNING *',
-    [name, emoji, req.params.id]
+    'UPDATE decks SET name = $1, emoji = $2 WHERE id = $3 AND user_id = $4 RETURNING *',
+    [name, emoji, req.params.id, req.user.id]
   );
+  if (!rows[0]) return res.status(404).json({ error: 'Mazo no encontrado' });
   res.json(rows[0]);
 }));
 
-app.delete('/api/decks/:id', h(async (req, res) => {
-  await pool.query('DELETE FROM decks WHERE id = $1', [req.params.id]);
+app.delete('/api/decks/:id', auth, h(async (req, res) => {
+  await pool.query('DELETE FROM decks WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
   res.json({ ok: true });
 }));
 
-// ── Cards ──
+// ── Cards (protected) ──
 
-app.get('/api/decks/:id/cards', h(async (req, res) => {
+app.get('/api/decks/:id/cards', auth, h(async (req, res) => {
+  // Verify deck ownership
+  const deck = await pool.query('SELECT id FROM decks WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+  if (!deck.rows[0]) return res.status(404).json({ error: 'Mazo no encontrado' });
+
   const { rows } = await pool.query(
     'SELECT * FROM cards WHERE deck_id = $1 ORDER BY created_at',
     [req.params.id]
@@ -79,7 +146,10 @@ app.get('/api/decks/:id/cards', h(async (req, res) => {
   res.json(rows);
 }));
 
-app.post('/api/decks/:id/cards', h(async (req, res) => {
+app.post('/api/decks/:id/cards', auth, h(async (req, res) => {
+  const deck = await pool.query('SELECT id FROM decks WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+  if (!deck.rows[0]) return res.status(404).json({ error: 'Mazo no encontrado' });
+
   const { front, back } = req.body;
   const { rows } = await pool.query(
     'INSERT INTO cards (deck_id, front, back) VALUES ($1, $2, $3) RETURNING *',
@@ -88,23 +158,32 @@ app.post('/api/decks/:id/cards', h(async (req, res) => {
   res.json(rows[0]);
 }));
 
-app.put('/api/cards/:id', h(async (req, res) => {
+app.put('/api/cards/:id', auth, h(async (req, res) => {
   const { front, back } = req.body;
   const { rows } = await pool.query(
-    'UPDATE cards SET front = $1, back = $2 WHERE id = $3 RETURNING *',
-    [front, back, req.params.id]
+    `UPDATE cards SET front = $1, back = $2
+     WHERE id = $3 AND deck_id IN (SELECT id FROM decks WHERE user_id = $4)
+     RETURNING *`,
+    [front, back, req.params.id, req.user.id]
   );
+  if (!rows[0]) return res.status(404).json({ error: 'Tarjeta no encontrada' });
   res.json(rows[0]);
 }));
 
-app.delete('/api/cards/:id', h(async (req, res) => {
-  await pool.query('DELETE FROM cards WHERE id = $1', [req.params.id]);
+app.delete('/api/cards/:id', auth, h(async (req, res) => {
+  await pool.query(
+    `DELETE FROM cards WHERE id = $1 AND deck_id IN (SELECT id FROM decks WHERE user_id = $2)`,
+    [req.params.id, req.user.id]
+  );
   res.json({ ok: true });
 }));
 
-// ── Study ──
+// ── Study (protected) ──
 
-app.get('/api/decks/:id/study', h(async (req, res) => {
+app.get('/api/decks/:id/study', auth, h(async (req, res) => {
+  const deck = await pool.query('SELECT id FROM decks WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+  if (!deck.rows[0]) return res.status(404).json({ error: 'Mazo no encontrado' });
+
   const { rows } = await pool.query(
     'SELECT * FROM cards WHERE deck_id = $1 AND next_review <= NOW() ORDER BY next_review LIMIT 50',
     [req.params.id]
@@ -116,9 +195,13 @@ app.get('/api/decks/:id/study', h(async (req, res) => {
   res.json(rows);
 }));
 
-app.post('/api/cards/:id/review', h(async (req, res) => {
+app.post('/api/cards/:id/review', auth, h(async (req, res) => {
   const { rating } = req.body;
-  const { rows: [card] } = await pool.query('SELECT * FROM cards WHERE id = $1', [req.params.id]);
+  const { rows: [card] } = await pool.query(
+    `SELECT c.* FROM cards c JOIN decks d ON c.deck_id = d.id
+     WHERE c.id = $1 AND d.user_id = $2`,
+    [req.params.id, req.user.id]
+  );
   if (!card) return res.status(404).json({ error: 'Tarjeta no encontrada' });
 
   let { interval_days, ease_factor, review_count, correct_count } = card;

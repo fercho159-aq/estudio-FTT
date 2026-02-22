@@ -2,9 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
   <title>Mnemo — Estudio con Tarjetas</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <meta name="theme-color" content="#C25E30">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mnemo">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,15 +38,19 @@
       --shadow-sm: 0 1px 3px rgba(42,37,32,0.06);
       --shadow: 0 4px 16px rgba(42,37,32,0.08);
       --shadow-lg: 0 12px 40px rgba(42,37,32,0.12);
-      --radius: 14px;
-      --radius-sm: 10px;
-      --radius-xs: 6px;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-xs: 8px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
     }
 
     [data-theme="dark"] {
-      --bg: #161412;
-      --bg-surface: #211E1B;
-      --bg-elevated: #2C2824;
+      --bg: #141210;
+      --bg-surface: #1E1C18;
+      --bg-elevated: #282420;
       --text: #EAE4DA;
       --text-secondary: #9A948C;
       --text-tertiary: #5A544C;
@@ -53,33 +63,39 @@
       --warning-soft: rgba(212,168,67,0.12);
       --danger: #E4655E;
       --danger-soft: rgba(228,101,94,0.1);
-      --border: #3A3530;
-      --border-light: #2A2622;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.15);
-      --shadow: 0 4px 16px rgba(0,0,0,0.2);
-      --shadow-lg: 0 12px 40px rgba(0,0,0,0.3);
+      --border: #332E28;
+      --border-light: #252220;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+      --shadow: 0 4px 16px rgba(0,0,0,0.25);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
     }
 
+    html { height: 100%; }
     body {
       font-family: 'Work Sans', -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.5;
-      min-height: 100vh;
+      min-height: 100%;
       transition: background 0.4s, color 0.3s;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
     }
 
-    /* ── Typography ── */
-    .font-display { font-family: 'Fraunces', Georgia, serif; }
-    .text-secondary { color: var(--text-secondary); }
-    .text-tertiary { color: var(--text-tertiary); }
-
     /* ── Layout ── */
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 0 20px;
+      padding-left: max(20px, var(--safe-left));
+      padding-right: max(20px, var(--safe-right));
+    }
 
     /* ── Header ── */
     .header {
-      padding: 20px 0;
+      padding: 14px 0;
+      padding-top: max(14px, var(--safe-top));
       border-bottom: 1px solid var(--border);
       background: var(--bg-surface);
       position: sticky; top: 0; z-index: 50;
@@ -90,7 +106,7 @@
     }
     .logo {
       font-family: 'Fraunces', serif;
-      font-size: 22px; font-weight: 700;
+      font-size: 20px; font-weight: 700;
       font-style: italic;
       color: var(--accent);
       letter-spacing: -0.5px;
@@ -98,120 +114,140 @@
       cursor: pointer;
       user-select: none;
     }
-    .logo span { font-size: 20px; }
-    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .logo span { font-size: 18px; }
+    .header-actions { display: flex; align-items: center; gap: 6px; }
 
     .theme-toggle {
-      width: 40px; height: 40px;
+      width: 42px; height: 42px;
       display: flex; align-items: center; justify-content: center;
       border-radius: 50%; border: 1px solid var(--border);
       background: var(--bg); cursor: pointer;
-      transition: all 0.2s; font-size: 18px;
+      transition: all 0.2s; font-size: 17px;
     }
-    .theme-toggle:hover { background: var(--border-light); transform: scale(1.05); }
+    .theme-toggle:active { transform: scale(0.92); }
 
     /* ── Buttons ── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 20px; border-radius: var(--radius-sm);
-      font-family: 'Work Sans', sans-serif; font-weight: 600; font-size: 14px;
-      border: none; cursor: pointer; transition: all 0.2s;
+      padding: 12px 22px; border-radius: var(--radius-sm);
+      font-family: 'Work Sans', sans-serif; font-weight: 600;
+      font-size: 15px;
+      border: none; cursor: pointer; transition: all 0.15s;
       text-decoration: none; white-space: nowrap;
+      min-height: 48px;
     }
-    .btn:active { transform: scale(0.97); }
+    .btn:active { transform: scale(0.96); opacity: 0.85; }
     .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow); }
-    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-    .btn-secondary:hover { border-color: var(--text-tertiary); }
-    .btn-ghost { background: transparent; color: var(--text-secondary); padding: 8px 12px; }
-    .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); padding: 10px 14px; }
+    .btn-ghost:active { background: var(--accent-soft); color: var(--accent); }
     .btn-danger { background: var(--danger-soft); color: var(--danger); }
-    .btn-danger:hover { background: var(--danger); color: #fff; }
-    .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: var(--radius-xs); }
+    .btn-danger:active { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 8px 16px; font-size: 14px; min-height: 40px; border-radius: var(--radius-xs); }
+    .btn-block { width: 100%; }
     .btn-icon {
-      width: 36px; height: 36px; padding: 0;
+      width: 44px; height: 44px; padding: 0;
       border-radius: var(--radius-xs);
       background: transparent; color: var(--text-tertiary);
-      border: none; cursor: pointer; font-size: 16px;
+      border: none; cursor: pointer; font-size: 18px;
       display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
-    .btn-icon:hover { background: var(--border-light); color: var(--text); }
+    .btn-icon:active { background: var(--border-light); color: var(--text); transform: scale(0.92); }
 
     /* ── Inputs ── */
     .input, .textarea {
-      width: 100%; padding: 12px 16px;
+      width: 100%; padding: 14px 16px;
       border: 1.5px solid var(--border); border-radius: var(--radius-sm);
       background: var(--bg); color: var(--text);
-      font-family: 'Work Sans', sans-serif; font-size: 15px;
+      font-family: 'Work Sans', sans-serif;
+      font-size: 16px; /* 16px prevents iOS zoom */
       transition: border-color 0.2s, box-shadow 0.2s;
       outline: none;
+      -webkit-appearance: none;
     }
     .input:focus, .textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-soft);
     }
     .input::placeholder, .textarea::placeholder { color: var(--text-tertiary); }
-    .textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-label {
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
 
     /* ── Page Header ── */
     .page-header {
-      padding: 32px 0 24px;
+      padding: 24px 0 20px;
       display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 16px; flex-wrap: wrap;
+      gap: 12px;
     }
     .page-title {
       font-family: 'Fraunces', serif;
-      font-size: 32px; font-weight: 700;
+      font-size: 26px; font-weight: 700;
       letter-spacing: -0.5px; line-height: 1.2;
     }
-    .page-subtitle { color: var(--text-secondary); margin-top: 4px; font-size: 15px; }
+    .page-subtitle { color: var(--text-secondary); margin-top: 2px; font-size: 14px; }
+
+    /* ── Greeting ── */
+    .greeting {
+      font-family: 'Fraunces', serif;
+      font-size: 28px; font-weight: 600;
+      font-style: italic;
+      color: var(--accent);
+      padding: 28px 0 4px;
+      line-height: 1.2;
+    }
+    .greeting-sub {
+      color: var(--text-secondary); font-size: 14px;
+      padding-bottom: 20px;
+    }
 
     /* ── Dashboard Deck Grid ── */
     .deck-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px; padding-bottom: 40px;
+      display: flex; flex-direction: column;
+      gap: 12px; padding-bottom: 100px;
     }
     .deck-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 20px;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all 0.2s;
       position: relative;
-      overflow: hidden;
+      display: flex; gap: 16px; align-items: flex-start;
+      -webkit-user-select: none; user-select: none;
     }
-    .deck-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: var(--accent);
-      opacity: 0; transition: opacity 0.25s;
+    .deck-card:active {
+      transform: scale(0.98);
+      background: var(--border-light);
     }
-    .deck-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--accent);
+    .deck-emoji {
+      font-size: 32px;
+      width: 56px; height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent-soft);
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
     }
-    .deck-card:hover::before { opacity: 1; }
-    .deck-emoji { font-size: 36px; margin-bottom: 12px; display: block; }
+    .deck-body { flex: 1; min-width: 0; }
     .deck-name {
       font-family: 'Fraunces', serif;
-      font-size: 19px; font-weight: 600;
-      margin-bottom: 4px; line-height: 1.3;
+      font-size: 17px; font-weight: 600;
+      line-height: 1.3; margin-bottom: 2px;
     }
-    .deck-meta { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+    .deck-meta {
+      font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;
+    }
     .deck-stats {
-      display: flex; gap: 12px; font-size: 12px; font-weight: 500;
-      margin-bottom: 12px;
+      display: flex; gap: 10px; font-size: 11px; font-weight: 600;
+      margin-bottom: 10px; flex-wrap: wrap;
     }
     .deck-stat { display: flex; align-items: center; gap: 4px; }
-    .stat-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-    }
+    .stat-dot { width: 7px; height: 7px; border-radius: 50%; }
     .dot-due { background: var(--warning); }
     .dot-learning { background: var(--accent); }
     .dot-mastered { background: var(--success); }
@@ -223,111 +259,196 @@
     .progress-segment { height: 100%; transition: width 0.4s ease; }
     .progress-mastered { background: var(--success); }
     .progress-learning { background: var(--accent); }
+    .deck-due-badge {
+      position: absolute; top: 14px; right: 16px;
+      background: var(--warning);
+      color: #fff; font-size: 12px; font-weight: 700;
+      padding: 2px 10px; border-radius: 20px;
+      min-width: 28px; text-align: center;
+    }
+
+    /* ── FAB ── */
+    .fab {
+      position: fixed;
+      bottom: max(24px, var(--safe-bottom));
+      right: max(20px, var(--safe-right));
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      border: none; cursor: pointer;
+      font-size: 28px; font-weight: 300;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(194,94,48,0.35);
+      z-index: 40;
+      transition: all 0.15s;
+    }
+    .fab:active { transform: scale(0.9); }
 
     /* ── Deck Detail ── */
     .deck-hero {
-      display: flex; align-items: center; gap: 20px;
-      padding: 28px 0;
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 0 16px;
     }
     .deck-hero-emoji {
-      font-size: 52px;
-      width: 80px; height: 80px;
+      font-size: 40px;
+      width: 64px; height: 64px;
       display: flex; align-items: center; justify-content: center;
       background: var(--accent-soft);
-      border-radius: var(--radius);
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
     }
-    .deck-hero-info { flex: 1; }
+    .deck-hero-info { flex: 1; min-width: 0; }
     .deck-hero-name {
       font-family: 'Fraunces', serif;
-      font-size: 28px; font-weight: 700;
+      font-size: 22px; font-weight: 700;
       line-height: 1.2;
     }
-    .deck-hero-count { color: var(--text-secondary); font-size: 15px; margin-top: 2px; }
-    .deck-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .deck-hero-count { color: var(--text-secondary); font-size: 14px; margin-top: 2px; }
+    .deck-hero-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
     .stat-cards {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-      margin-bottom: 28px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      margin-bottom: 16px;
     }
     .stat-card {
       background: var(--bg-surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 16px; text-align: center;
+      border-radius: var(--radius-sm); padding: 14px 8px; text-align: center;
       transition: background 0.3s, border-color 0.3s;
     }
     .stat-value {
       font-family: 'Fraunces', serif;
-      font-size: 28px; font-weight: 700; line-height: 1;
+      font-size: 26px; font-weight: 700; line-height: 1;
     }
-    .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-label {
+      font-size: 10px; color: var(--text-secondary); margin-top: 4px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    }
     .stat-due .stat-value { color: var(--warning); }
     .stat-learning .stat-value { color: var(--accent); }
     .stat-mastered .stat-value { color: var(--success); }
 
+    .study-cta {
+      margin-bottom: 24px;
+    }
+    .study-cta .btn {
+      width: 100%; padding: 16px; font-size: 16px;
+      border-radius: var(--radius);
+    }
+
     .card-list { display: flex; flex-direction: column; gap: 2px; padding-bottom: 40px; }
     .card-list-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0; margin-bottom: 8px;
+      padding: 10px 0; margin-bottom: 6px;
       border-bottom: 1px solid var(--border);
     }
-    .card-list-title { font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+    .card-list-title {
+      font-weight: 600; font-size: 12px; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-secondary);
+    }
 
     .card-item {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 16px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 12px; border-radius: var(--radius-sm);
       background: var(--bg-surface);
       border: 1px solid transparent;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      -webkit-user-select: none; user-select: none;
     }
-    .card-item:hover { border-color: var(--border); box-shadow: var(--shadow-sm); }
+    .card-item:active { background: var(--border-light); }
+    .card-texts { flex: 1; min-width: 0; }
     .card-front-preview {
-      flex: 1; font-size: 15px;
+      font-size: 14px; font-weight: 500;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .card-back-preview {
-      flex: 1; font-size: 13px; color: var(--text-secondary);
+      font-size: 12px; color: var(--text-secondary);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 1px;
     }
     .card-badge {
-      font-size: 11px; font-weight: 600; padding: 3px 10px;
-      border-radius: 20px; white-space: nowrap;
+      font-size: 10px; font-weight: 700; padding: 3px 8px;
+      border-radius: 20px; white-space: nowrap; flex-shrink: 0;
     }
     .badge-new { background: var(--accent-soft); color: var(--accent); }
     .badge-learning { background: var(--warning-soft); color: var(--warning); }
     .badge-mastered { background: var(--success-soft); color: var(--success); }
-    .card-item-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.2s; }
-    .card-item:hover .card-item-actions { opacity: 1; }
+    .card-item-actions { display: flex; gap: 0; flex-shrink: 0; }
 
-    /* ── Study Mode ── */
-    .study-container {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 32px 0 40px; min-height: calc(100vh - 80px);
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      text-decoration: none; cursor: pointer;
+      padding: 8px 0;
+      transition: color 0.2s;
+      min-height: 44px;
     }
-    .study-progress {
-      width: 100%; max-width: 500px; margin-bottom: 32px;
+    .back-link:active { color: var(--accent); }
+
+    /* ══════════════════════════════════════
+       STUDY MODE — Full-screen immersive
+       ══════════════════════════════════════ */
+    .study-view {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg);
+      z-index: 90;
+      padding-top: var(--safe-top);
+      animation: fadeIn 0.25s ease;
     }
-    .study-progress-label {
-      display: flex; justify-content: space-between;
-      font-size: 13px; color: var(--text-secondary); font-weight: 500;
-      margin-bottom: 8px;
+    .study-topbar {
+      padding: 12px 20px;
+      padding-left: max(20px, var(--safe-left));
+      padding-right: max(20px, var(--safe-right));
+      display: flex; align-items: center; gap: 14px;
+      flex-shrink: 0;
     }
-    .study-progress-bar {
-      height: 6px; border-radius: 3px;
+    .study-close {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 20px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .study-close:active { transform: scale(0.9); background: var(--border-light); }
+    .study-info { flex: 1; }
+    .study-counter {
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .study-bar {
+      height: 5px; border-radius: 3px;
       background: var(--border-light); overflow: hidden;
     }
-    .study-progress-fill {
+    .study-bar-fill {
       height: 100%; border-radius: 3px;
       background: var(--accent);
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .study-card-area {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 12px 20px;
+      padding-left: max(20px, var(--safe-left));
+      padding-right: max(20px, var(--safe-right));
+      cursor: pointer;
+      overflow: hidden;
     }
 
     .flashcard {
       perspective: 1200px;
-      width: 100%; max-width: 500px; height: 320px;
-      cursor: pointer; margin-bottom: 32px;
+      width: 100%; max-width: 480px;
+      height: 100%; max-height: 440px;
     }
     .flashcard-inner {
       width: 100%; height: 100%;
-      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
       transform-style: preserve-3d;
       position: relative;
     }
@@ -338,145 +459,205 @@
       -webkit-backface-visibility: hidden;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 40px 32px;
+      padding: 32px 24px;
       border-radius: var(--radius);
       text-align: center;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .flashcard-front {
       background: var(--bg-surface);
       border: 1.5px solid var(--border);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-lg), 0 1px 0 var(--border);
     }
     .flashcard-back {
       transform: rotateY(180deg);
-      background: var(--accent-soft);
+      background: linear-gradient(135deg, var(--accent-soft), rgba(194,94,48,0.04));
       border: 1.5px solid var(--accent);
       box-shadow: var(--shadow-lg);
     }
     .flashcard-text {
       font-family: 'Fraunces', serif;
-      font-size: 24px; font-weight: 500;
-      line-height: 1.4;
+      font-weight: 500;
+      line-height: 1.45;
+      word-break: break-word;
+      white-space: pre-line;
     }
     .flashcard-hint {
-      position: absolute; bottom: 20px;
+      position: absolute; bottom: 16px;
       font-size: 12px; color: var(--text-tertiary);
       font-weight: 500;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hint-tap {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 1.5px solid var(--text-tertiary);
+      border-radius: 4px;
+      font-size: 10px;
+      line-height: 18px;
+      text-align: center;
     }
 
+    .study-bottombar {
+      padding: 16px 20px;
+      padding-left: max(20px, var(--safe-left));
+      padding-right: max(20px, var(--safe-right));
+      padding-bottom: max(16px, calc(var(--safe-bottom) + 8px));
+      flex-shrink: 0;
+    }
+    .study-hint-bottom {
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 14px; font-weight: 500;
+      padding: 14px 0;
+    }
     .rating-buttons {
-      display: flex; gap: 12px; width: 100%; max-width: 500px;
-      animation: fadeUp 0.3s ease;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      animation: fadeUp 0.25s ease;
     }
     .rating-btn {
-      flex: 1; padding: 16px 12px;
+      padding: 14px 8px;
       border-radius: var(--radius-sm); border: 2px solid;
       cursor: pointer; text-align: center;
       font-family: 'Work Sans', sans-serif;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      min-height: 62px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
     }
-    .rating-btn:hover { transform: translateY(-2px); }
-    .rating-btn:active { transform: scale(0.97); }
-    .rating-name { font-weight: 700; font-size: 15px; display: block; }
-    .rating-key { font-size: 11px; opacity: 0.6; margin-top: 2px; display: block; }
+    .rating-btn:active { transform: scale(0.94); }
+    .rating-icon { font-size: 18px; margin-bottom: 2px; }
+    .rating-name { font-weight: 700; font-size: 14px; display: block; }
+    .rating-key {
+      font-size: 10px; opacity: 0.5; margin-top: 1px; display: block;
+    }
     .rating-hard {
-      border-color: var(--danger);
-      background: var(--danger-soft); color: var(--danger);
+      border-color: var(--danger); background: var(--danger-soft); color: var(--danger);
     }
-    .rating-hard:hover { background: var(--danger); color: #fff; }
+    .rating-hard:active { background: var(--danger); color: #fff; }
     .rating-normal {
-      border-color: var(--warning);
-      background: var(--warning-soft); color: var(--warning);
+      border-color: var(--warning); background: var(--warning-soft); color: var(--warning);
     }
-    .rating-normal:hover { background: var(--warning); color: #fff; }
+    .rating-normal:active { background: var(--warning); color: #fff; }
     .rating-easy {
-      border-color: var(--success);
-      background: var(--success-soft); color: var(--success);
+      border-color: var(--success); background: var(--success-soft); color: var(--success);
     }
-    .rating-easy:hover { background: var(--success); color: #fff; }
+    .rating-easy:active { background: var(--success); color: #fff; }
 
     /* ── Results ── */
     .results {
-      text-align: center; padding: 60px 0;
+      text-align: center;
+      padding: 48px 20px;
       animation: fadeUp 0.5s ease;
     }
-    .results-emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+    .results-emoji { font-size: 56px; margin-bottom: 12px; display: block; }
     .results-title {
       font-family: 'Fraunces', serif;
-      font-size: 32px; font-weight: 700; margin-bottom: 8px;
+      font-size: 26px; font-weight: 700; margin-bottom: 6px;
     }
-    .results-subtitle { color: var(--text-secondary); font-size: 16px; margin-bottom: 32px; }
+    .results-subtitle {
+      color: var(--text-secondary); font-size: 15px; margin-bottom: 28px;
+    }
     .results-stats {
-      display: flex; justify-content: center; gap: 32px;
-      margin-bottom: 40px;
+      display: flex; justify-content: center; gap: 28px;
+      margin-bottom: 36px;
     }
     .results-stat-value {
       font-family: 'Fraunces', serif;
-      font-size: 36px; font-weight: 700;
+      font-size: 32px; font-weight: 700;
     }
-    .results-stat-label { font-size: 13px; color: var(--text-secondary); }
+    .results-stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .results-actions {
+      display: flex; flex-direction: column; gap: 10px;
+      max-width: 300px; margin: 0 auto;
+    }
 
-    /* ── Modal ── */
+    /* ── Modal (bottom sheet on mobile) ── */
     .modal-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.45);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100; padding: 24px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
       animation: fadeIn 0.15s ease;
       backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
     .modal {
       background: var(--bg-surface);
-      border-radius: var(--radius);
-      padding: 32px;
-      width: 100%; max-width: 460px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 8px 24px 24px;
+      padding-bottom: max(24px, calc(var(--safe-bottom) + 16px));
+      width: 100%; max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: var(--shadow-lg);
-      animation: slideUp 0.25s ease;
+      animation: sheetUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .sheet-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 8px auto 20px;
     }
     .modal-title {
       font-family: 'Fraunces', serif;
-      font-size: 22px; font-weight: 700;
-      margin-bottom: 24px;
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 20px;
     }
     .modal-actions {
-      display: flex; justify-content: flex-end; gap: 10px;
-      margin-top: 24px;
+      display: flex; gap: 10px;
+      margin-top: 20px;
     }
+    .modal-actions .btn { flex: 1; }
     .emoji-grid {
       display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
     }
     .emoji-option {
-      width: 40px; height: 40px;
+      width: 42px; height: 42px;
       display: flex; align-items: center; justify-content: center;
       font-size: 20px; border-radius: var(--radius-xs);
       border: 2px solid transparent;
-      cursor: pointer; transition: all 0.15s;
+      cursor: pointer; transition: all 0.1s;
       background: var(--bg);
     }
-    .emoji-option:hover { border-color: var(--border); transform: scale(1.1); }
+    .emoji-option:active { transform: scale(1.15); }
     .emoji-option.selected { border-color: var(--accent); background: var(--accent-soft); }
 
     /* ── Empty State ── */
     .empty-state {
-      text-align: center; padding: 80px 20px;
+      text-align: center; padding: 60px 20px;
     }
-    .empty-icon { font-size: 56px; margin-bottom: 16px; display: block; opacity: 0.8; }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; display: block; opacity: 0.8; }
     .empty-title {
       font-family: 'Fraunces', serif;
-      font-size: 22px; font-weight: 600; margin-bottom: 8px;
+      font-size: 20px; font-weight: 600; margin-bottom: 6px;
     }
-    .empty-text { color: var(--text-secondary); font-size: 15px; margin-bottom: 24px; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .empty-text {
+      color: var(--text-secondary); font-size: 14px;
+      margin-bottom: 20px; max-width: 280px;
+      margin-left: auto; margin-right: auto;
+    }
 
-    /* ── Back link ── */
-    .back-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 14px; font-weight: 500; color: var(--text-secondary);
-      text-decoration: none; cursor: pointer;
-      padding: 4px 0; margin-bottom: 8px;
-      transition: color 0.2s;
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: max(24px, calc(var(--safe-bottom) + 12px));
+      left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg);
+      padding: 12px 24px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 200;
+      animation: fadeUp 0.3s ease;
+      max-width: calc(100vw - 40px);
+      text-align: center;
     }
-    .back-link:hover { color: var(--accent); }
+    .toast.hide { opacity: 0; transition: opacity 0.3s; }
 
     /* ── Animations ── */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -484,45 +665,97 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px) scale(0.97); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+    @keyframes sheetUp {
+      from { opacity: 0; transform: translateY(100%); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .animate-in { animation: fadeUp 0.35s ease backwards; }
+    .animate-in { animation: fadeUp 0.3s ease backwards; }
     .stagger-1 { animation-delay: 0.03s; }
     .stagger-2 { animation-delay: 0.06s; }
     .stagger-3 { animation-delay: 0.09s; }
     .stagger-4 { animation-delay: 0.12s; }
     .stagger-5 { animation-delay: 0.15s; }
     .stagger-6 { animation-delay: 0.18s; }
-    .stagger-7 { animation-delay: 0.21s; }
-    .stagger-8 { animation-delay: 0.24s; }
 
-    /* ── Toast ── */
-    .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: var(--text); color: var(--bg);
-      padding: 12px 24px; border-radius: var(--radius-sm);
-      font-size: 14px; font-weight: 500;
-      box-shadow: var(--shadow-lg);
-      z-index: 200;
-      animation: fadeUp 0.3s ease, fadeIn 0.3s ease;
+    /* ── Auth View ── */
+    .auth-view {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      background: var(--bg);
     }
-    .toast.hide { opacity: 0; transition: opacity 0.3s; }
+    .auth-card {
+      width: 100%; max-width: 380px;
+      text-align: center;
+    }
+    .auth-logo {
+      font-size: 48px; margin-bottom: 8px;
+    }
+    .auth-title {
+      font-family: 'Fraunces', serif;
+      font-size: 32px; font-weight: 700;
+      font-style: italic;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .auth-subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+    .auth-card .form-group { text-align: left; }
+    .auth-error {
+      background: var(--danger-soft);
+      color: var(--danger);
+      padding: 10px 14px;
+      border-radius: var(--radius-xs);
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .auth-toggle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    .auth-toggle a {
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .auth-toggle a:active { opacity: 0.7; }
+    .user-badge {
+      font-size: 13px; color: var(--text-secondary);
+      font-weight: 500;
+      max-width: 80px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
 
-    /* ── Responsive ── */
-    @media (max-width: 600px) {
-      .page-title { font-size: 26px; }
-      .deck-grid { grid-template-columns: 1fr; }
-      .stat-cards { grid-template-columns: 1fr; gap: 8px; }
-      .flashcard { height: 280px; }
-      .flashcard-text { font-size: 20px; }
-      .rating-buttons { flex-direction: column; }
-      .deck-hero { flex-direction: column; text-align: center; }
-      .deck-actions { justify-content: center; }
-      .results-stats { flex-direction: column; gap: 16px; }
-      .modal { padding: 24px; }
-      .card-item-actions { opacity: 1; }
+    /* ── Desktop enhancements ── */
+    @media (min-width: 640px) {
+      .container { max-width: 700px; padding: 0 32px; }
+      .page-title { font-size: 30px; }
+      .greeting { font-size: 32px; }
+      .deck-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+      .modal {
+        border-radius: var(--radius);
+        max-width: 460px;
+        margin-bottom: 10vh;
+        animation: fadeUp 0.25s ease;
+      }
+      .modal-overlay {
+        align-items: center;
+      }
+      .flashcard { max-height: 480px; }
+      .flashcard-text { max-width: 420px; }
+      .rating-key { display: block; }
+      .btn:hover:not(:active) { transform: translateY(-1px); }
+      .btn-primary:hover { box-shadow: var(--shadow); }
+      .deck-card:hover { box-shadow: var(--shadow); border-color: var(--accent); }
     }
   </style>
 </head>
@@ -533,7 +766,7 @@
 <script>
 // ── State ──
 let state = {
-  view: 'dashboard',
+  view: 'loading',
   decks: [],
   currentDeck: null,
   cards: [],
@@ -542,23 +775,116 @@ let state = {
   flipped: false,
   results: [],
   modal: null,
-  darkMode: localStorage.getItem('mnemo-dark') === 'true'
+  darkMode: localStorage.getItem('mnemo-dark') === 'true',
+  // Auth
+  token: localStorage.getItem('mnemo-token'),
+  user: null,
+  authMode: 'login',
+  authError: null
 };
 
 const EMOJIS = ['📚','📖','🧠','💡','🌍','🔬','🧪','🎨','🎵','🔢','📐','🌿','💻','🗣️','✏️','🏛️','⚡','🧬','📊','🎯','🏥','⚖️','🎭','🌊','🚀','🎓','📝','🔤','🗺️','🧮'];
 
+// ── Utils ──
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escNl(str) {
+  return esc(str).replace(/\\n/g, '\n');
+}
+function cardFontSize(text) {
+  const len = (text || '').length;
+  if (len < 40) return 'clamp(20px, 5vw, 26px)';
+  if (len < 100) return 'clamp(17px, 4.2vw, 22px)';
+  if (len < 200) return 'clamp(15px, 3.5vw, 18px)';
+  return 'clamp(13px, 3vw, 16px)';
+}
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Buenos días';
+  if (h < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+function haptic() {
+  if ('vibrate' in navigator) navigator.vibrate(8);
+}
+
 // ── API ──
 async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (state.token) opts.headers['Authorization'] = 'Bearer ' + state.token;
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch('/api' + path, opts);
-  if (!res.ok) throw new Error((await res.json()).error || 'Error de red');
+  if (res.status === 401) {
+    logout();
+    throw new Error('Sesión expirada');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error de red');
+  }
   return res.json();
+}
+
+// ── Auth Actions ──
+async function submitAuth() {
+  const username = document.getElementById('auth-username')?.value.trim();
+  const password = document.getElementById('auth-password')?.value;
+  if (!username || !password) { state.authError = 'Completa todos los campos'; render(); return; }
+
+  try {
+    state.authError = null;
+    const endpoint = state.authMode === 'register' ? '/register' : '/login';
+    const data = await api('POST', endpoint, { username, password });
+    state.token = data.token;
+    state.user = data.user;
+    localStorage.setItem('mnemo-token', data.token);
+    state.view = 'dashboard';
+    await loadDecks();
+  } catch (e) {
+    state.authError = e.message;
+    render();
+  }
+}
+
+function logout() {
+  state.token = null;
+  state.user = null;
+  state.view = 'login';
+  state.decks = [];
+  state.currentDeck = null;
+  state.cards = [];
+  localStorage.removeItem('mnemo-token');
+  render();
+}
+
+async function checkAuth() {
+  if (!state.token) {
+    state.view = 'login';
+    render();
+    return;
+  }
+  try {
+    state.user = await api('GET', '/me');
+    state.view = 'dashboard';
+    await loadDecks();
+  } catch (e) {
+    state.token = null;
+    localStorage.removeItem('mnemo-token');
+    state.view = 'login';
+    render();
+  }
 }
 
 // ── Actions ──
 async function loadDecks() {
-  state.decks = await api('GET', '/decks');
+  try {
+    state.decks = await api('GET', '/decks');
+  } catch (e) {
+    toast('Error de conexión');
+    state.decks = [];
+  }
   render();
 }
 
@@ -573,7 +899,7 @@ async function openDeck(id) {
 async function startStudy(deckId) {
   const cards = await api('GET', `/decks/${deckId}/study`);
   if (cards.length === 0) {
-    toast('No hay tarjetas pendientes por repasar');
+    toast('No hay tarjetas pendientes');
     return;
   }
   state.studyCards = cards;
@@ -585,6 +911,7 @@ async function startStudy(deckId) {
 }
 
 async function rateCard(rating) {
+  haptic();
   const card = state.studyCards[state.studyIndex];
   await api('POST', `/cards/${card.id}/review`, { rating });
   state.results.push({ card, rating });
@@ -598,6 +925,7 @@ async function rateCard(rating) {
 
 function flipCard() {
   if (state.view !== 'study') return;
+  haptic();
   state.flipped = !state.flipped;
   render();
 }
@@ -666,6 +994,8 @@ function toggleDark() {
 
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.darkMode ? 'dark' : 'light');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = state.darkMode ? '#141210' : '#C25E30';
 }
 
 function toast(msg) {
@@ -678,12 +1008,27 @@ function toast(msg) {
 // ── Render ──
 function render() {
   const app = document.getElementById('app');
+
+  if (state.view === 'loading') {
+    app.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--text-tertiary)">Cargando...</div>';
+    return;
+  }
+
+  if (state.view === 'login') {
+    app.innerHTML = renderAuth();
+    return;
+  }
+
+  if (state.view === 'study') {
+    app.innerHTML = renderStudy();
+    return;
+  }
+
   let html = renderHeader();
   html += '<main class="container">';
   switch (state.view) {
     case 'dashboard': html += renderDashboard(); break;
     case 'deck': html += renderDeckDetail(); break;
-    case 'study': html += renderStudy(); break;
     case 'results': html += renderResults(); break;
   }
   html += '</main>';
@@ -691,8 +1036,35 @@ function render() {
   app.innerHTML = html;
 }
 
+function renderAuth() {
+  const isRegister = state.authMode === 'register';
+  return `
+    <div class="auth-view">
+      <div class="auth-card animate-in">
+        <div class="auth-logo">🧠</div>
+        <h1 class="auth-title">Mnemo</h1>
+        <p class="auth-subtitle">${isRegister ? 'Crea tu cuenta para empezar' : 'Inicia sesión para estudiar'}</p>
+        ${state.authError ? `<div class="auth-error">${esc(state.authError)}</div>` : ''}
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Usuario</label>
+          <input class="input" id="auth-username" placeholder="Tu nombre de usuario" autocomplete="username" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">Contraseña</label>
+          <input class="input" id="auth-password" type="password" placeholder="${isRegister ? 'Mínimo 4 caracteres' : 'Tu contraseña'}" autocomplete="${isRegister ? 'new-password' : 'current-password'}">
+        </div>
+        <button class="btn btn-primary btn-block" data-action="submitAuth">
+          ${isRegister ? 'Crear cuenta' : 'Entrar'}
+        </button>
+        <p class="auth-toggle">
+          ${isRegister ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?'}
+          <a data-action="toggleAuth">${isRegister ? 'Inicia sesión' : 'Regístrate'}</a>
+        </p>
+      </div>
+    </div>`;
+}
+
 function renderHeader() {
-  const showBack = state.view !== 'dashboard';
   return `
     <header class="header">
       <div class="container header-inner">
@@ -700,61 +1072,66 @@ function renderHeader() {
           <span>🧠</span> Mnemo
         </div>
         <div class="header-actions">
-          <button class="theme-toggle" data-action="toggleDark" title="Cambiar tema">
+          ${state.user ? `<span class="user-badge">${esc(state.user.username)}</span>` : ''}
+          <button class="theme-toggle" data-action="toggleDark" aria-label="Cambiar tema">
             ${state.darkMode ? '☀️' : '🌙'}
           </button>
+          ${state.user ? `<button class="btn-icon" data-action="logout" aria-label="Cerrar sesión" style="font-size:14px">↪</button>` : ''}
         </div>
       </div>
     </header>`;
 }
 
 function renderDashboard() {
+  const totalDue = state.decks.reduce((s, d) => s + d.due_count, 0);
+
   if (state.decks.length === 0) {
     return `
       <div class="empty-state animate-in">
         <span class="empty-icon">📇</span>
         <h2 class="empty-title">Tu colección está vacía</h2>
-        <p class="empty-text">Crea tu primer mazo de tarjetas para empezar a estudiar con repetición espaciada.</p>
+        <p class="empty-text">Crea tu primer mazo para empezar a estudiar con repetición espaciada.</p>
         <button class="btn btn-primary" data-action="showCreateDeck">Crear primer mazo</button>
       </div>`;
   }
+
   let html = `
-    <div class="page-header animate-in">
-      <div>
-        <h1 class="page-title">Mis Mazos</h1>
-        <p class="page-subtitle">${state.decks.length} mazo${state.decks.length !== 1 ? 's' : ''} · ${state.decks.reduce((s,d) => s + d.card_count, 0)} tarjetas</p>
-      </div>
-      <button class="btn btn-primary" data-action="showCreateDeck">+ Nuevo mazo</button>
+    <div class="animate-in">
+      <div class="greeting">${getGreeting()}</div>
+      <p class="greeting-sub">${totalDue > 0 ? `Tienes ${totalDue} tarjeta${totalDue !== 1 ? 's' : ''} por repasar` : 'Estás al día. ¡Bien hecho!'}</p>
     </div>
     <div class="deck-grid">`;
+
   state.decks.forEach((d, i) => {
     const total = d.card_count || 1;
     const masteredPct = (d.mastered_count / total * 100).toFixed(0);
     const learningPct = (d.learning_count / total * 100).toFixed(0);
     html += `
       <div class="deck-card animate-in stagger-${i + 1}" data-action="openDeck" data-id="${d.id}">
-        <span class="deck-emoji">${d.emoji}</span>
-        <div class="deck-name">${esc(d.name)}</div>
-        <div class="deck-meta">${d.card_count} tarjeta${d.card_count !== 1 ? 's' : ''}</div>
-        <div class="deck-stats">
-          ${d.due_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-due"></span>${d.due_count} pendiente${d.due_count !== 1 ? 's' : ''}</span>` : ''}
-          ${d.learning_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-learning"></span>${d.learning_count} aprendiendo</span>` : ''}
-          ${d.mastered_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-mastered"></span>${d.mastered_count} dominada${d.mastered_count !== 1 ? 's' : ''}</span>` : ''}
-        </div>
-        <div class="progress-bar">
-          <div class="progress-segment progress-mastered" style="width:${masteredPct}%"></div>
-          <div class="progress-segment progress-learning" style="width:${learningPct}%"></div>
+        ${d.due_count > 0 ? `<div class="deck-due-badge">${d.due_count}</div>` : ''}
+        <div class="deck-emoji">${d.emoji}</div>
+        <div class="deck-body">
+          <div class="deck-name">${esc(d.name)}</div>
+          <div class="deck-meta">${d.card_count} tarjeta${d.card_count !== 1 ? 's' : ''}</div>
+          <div class="deck-stats">
+            ${d.learning_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-learning"></span>${d.learning_count}</span>` : ''}
+            ${d.mastered_count > 0 ? `<span class="deck-stat"><span class="stat-dot dot-mastered"></span>${d.mastered_count}</span>` : ''}
+          </div>
+          <div class="progress-bar">
+            <div class="progress-segment progress-mastered" style="width:${masteredPct}%"></div>
+            <div class="progress-segment progress-learning" style="width:${learningPct}%"></div>
+          </div>
         </div>
       </div>`;
   });
   html += '</div>';
+  html += `<button class="fab" data-action="showCreateDeck" aria-label="Nuevo mazo">+</button>`;
   return html;
 }
 
 function renderDeckDetail() {
   const d = state.currentDeck;
   if (!d) return '';
-  const newCount = d.card_count - d.mastered_count - d.learning_count;
 
   let html = `
     <div class="animate-in">
@@ -765,12 +1142,9 @@ function renderDeckDetail() {
           <h1 class="deck-hero-name">${esc(d.name)}</h1>
           <p class="deck-hero-count">${d.card_count} tarjeta${d.card_count !== 1 ? 's' : ''}</p>
         </div>
-        <div class="deck-actions">
-          <button class="btn btn-primary" data-action="startStudy" data-id="${d.id}" ${d.due_count === 0 ? '' : ''}>
-            ${d.due_count > 0 ? `Estudiar (${d.due_count})` : 'Estudiar'}
-          </button>
-          <button class="btn-icon" data-action="showEditDeck" data-id="${d.id}" title="Editar">✏️</button>
-          <button class="btn-icon" data-action="showDeleteDeck" data-id="${d.id}" title="Eliminar">🗑️</button>
+        <div class="deck-hero-actions">
+          <button class="btn-icon" data-action="showEditDeck" data-id="${d.id}" aria-label="Editar">✏️</button>
+          <button class="btn-icon" data-action="showDeleteDeck" data-id="${d.id}" aria-label="Eliminar">🗑️</button>
         </div>
       </div>
     </div>
@@ -788,10 +1162,16 @@ function renderDeckDetail() {
         <div class="stat-value">${d.mastered_count}</div>
         <div class="stat-label">Dominadas</div>
       </div>
+    </div>
+
+    <div class="study-cta animate-in stagger-2">
+      <button class="btn btn-primary btn-block" data-action="startStudy" data-id="${d.id}">
+        ${d.due_count > 0 ? `Estudiar ${d.due_count} pendiente${d.due_count !== 1 ? 's' : ''}` : 'Estudiar'}
+      </button>
     </div>`;
 
   html += `
-    <div class="card-list animate-in stagger-2">
+    <div class="card-list animate-in stagger-3">
       <div class="card-list-header">
         <span class="card-list-title">Tarjetas</span>
         <button class="btn btn-sm btn-secondary" data-action="showCreateCard">+ Añadir</button>
@@ -799,10 +1179,10 @@ function renderDeckDetail() {
 
   if (state.cards.length === 0) {
     html += `
-      <div class="empty-state" style="padding:40px 20px">
-        <span class="empty-icon" style="font-size:40px">✨</span>
-        <h2 class="empty-title" style="font-size:18px">Sin tarjetas aún</h2>
-        <p class="empty-text" style="font-size:14px">Añade tarjetas para empezar a estudiar este mazo.</p>
+      <div class="empty-state" style="padding:32px 16px">
+        <span class="empty-icon" style="font-size:36px">✨</span>
+        <h2 class="empty-title" style="font-size:17px">Sin tarjetas aún</h2>
+        <p class="empty-text" style="font-size:13px">Añade tarjetas para empezar a estudiar.</p>
         <button class="btn btn-primary btn-sm" data-action="showCreateCard">Crear tarjeta</button>
       </div>`;
   } else {
@@ -811,15 +1191,16 @@ function renderDeckDetail() {
       if (c.review_count === 0) badge = '<span class="card-badge badge-new">Nueva</span>';
       else if (c.interval_days >= 21) badge = '<span class="card-badge badge-mastered">Dominada</span>';
       else badge = '<span class="card-badge badge-learning">Aprendiendo</span>';
-
       html += `
         <div class="card-item">
-          <div class="card-front-preview">${esc(c.front)}</div>
-          <div class="card-back-preview">${esc(c.back)}</div>
+          <div class="card-texts">
+            <div class="card-front-preview">${esc(c.front)}</div>
+            <div class="card-back-preview">${esc(c.back)}</div>
+          </div>
           ${badge}
           <div class="card-item-actions">
-            <button class="btn-icon" data-action="showEditCard" data-id="${c.id}" title="Editar">✏️</button>
-            <button class="btn-icon" data-action="showDeleteCard" data-id="${c.id}" title="Eliminar">🗑️</button>
+            <button class="btn-icon" data-action="showEditCard" data-id="${c.id}" aria-label="Editar">✏️</button>
+            <button class="btn-icon" data-action="showDeleteCard" data-id="${c.id}" aria-label="Eliminar">🗑️</button>
           </div>
         </div>`;
     });
@@ -833,48 +1214,60 @@ function renderStudy() {
   const idx = state.studyIndex;
   const card = state.studyCards[idx];
   const pct = ((idx) / total * 100).toFixed(0);
+  const frontSize = cardFontSize(card.front);
+  const backSize = cardFontSize(card.back);
 
   return `
-    <div class="study-container">
-      <div class="study-progress animate-in">
-        <div class="study-progress-label">
-          <span>Tarjeta ${idx + 1} de ${total}</span>
-          <span>${pct}% completado</span>
-        </div>
-        <div class="study-progress-bar">
-          <div class="study-progress-fill" style="width:${pct}%"></div>
-        </div>
-      </div>
-
-      <div class="flashcard ${state.flipped ? 'flipped' : ''}" data-action="flip">
-        <div class="flashcard-inner">
-          <div class="flashcard-face flashcard-front">
-            <div class="flashcard-text">${esc(card.front)}</div>
-            <div class="flashcard-hint">Clic o Espacio para voltear</div>
-          </div>
-          <div class="flashcard-face flashcard-back">
-            <div class="flashcard-text">${esc(card.back)}</div>
+    <div class="study-view">
+      <div class="study-topbar">
+        <button class="study-close" data-action="exitStudy">✕</button>
+        <div class="study-info">
+          <div class="study-counter">${idx + 1} de ${total}</div>
+          <div class="study-bar">
+            <div class="study-bar-fill" style="width:${pct}%"></div>
           </div>
         </div>
       </div>
 
-      ${state.flipped ? `
-        <div class="rating-buttons">
-          <button class="rating-btn rating-hard" data-action="rate" data-rating="1">
-            <span class="rating-name">Difícil</span>
-            <span class="rating-key">1</span>
-          </button>
-          <button class="rating-btn rating-normal" data-action="rate" data-rating="2">
-            <span class="rating-name">Normal</span>
-            <span class="rating-key">2</span>
-          </button>
-          <button class="rating-btn rating-easy" data-action="rate" data-rating="3">
-            <span class="rating-name">Fácil</span>
-            <span class="rating-key">3</span>
-          </button>
-        </div>` : ''}
+      <div class="study-card-area" data-action="flip">
+        <div class="flashcard ${state.flipped ? 'flipped' : ''}">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front">
+              <div class="flashcard-text" style="font-size:${frontSize}">${escNl(card.front)}</div>
+              <div class="flashcard-hint">
+                <span class="hint-tap">↻</span> Toca para voltear
+              </div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+              <div class="flashcard-text" style="font-size:${backSize}">${escNl(card.back)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <button class="btn btn-ghost" data-action="exitStudy" style="margin-top:24px">Salir del estudio</button>
+      <div class="study-bottombar">
+        ${state.flipped ? `
+          <div class="rating-buttons">
+            <button class="rating-btn rating-hard" data-action="rate" data-rating="1">
+              <span class="rating-icon">😓</span>
+              <span class="rating-name">Difícil</span>
+              <span class="rating-key">1</span>
+            </button>
+            <button class="rating-btn rating-normal" data-action="rate" data-rating="2">
+              <span class="rating-icon">🤔</span>
+              <span class="rating-name">Normal</span>
+              <span class="rating-key">2</span>
+            </button>
+            <button class="rating-btn rating-easy" data-action="rate" data-rating="3">
+              <span class="rating-icon">😊</span>
+              <span class="rating-name">Fácil</span>
+              <span class="rating-key">3</span>
+            </button>
+          </div>
+        ` : `
+          <div class="study-hint-bottom">Toca la tarjeta o presiona Espacio</div>
+        `}
+      </div>
     </div>`;
 }
 
@@ -883,11 +1276,10 @@ function renderResults() {
   const hard = state.results.filter(r => r.rating === 1).length;
   const normal = state.results.filter(r => r.rating === 2).length;
   const easy = state.results.filter(r => r.rating === 3).length;
-
   const messages = [
-    '¡Excelente sesión de estudio!',
-    '¡Buen trabajo, sigue así!',
-    '¡Tu memoria mejora cada día!',
+    '¡Excelente sesión!',
+    '¡Buen trabajo!',
+    '¡Tu memoria mejora!',
     '¡Increíble esfuerzo!'
   ];
   const msg = messages[Math.floor(Math.random() * messages.length)];
@@ -896,7 +1288,7 @@ function renderResults() {
     <div class="results">
       <span class="results-emoji">🎉</span>
       <h1 class="results-title">${msg}</h1>
-      <p class="results-subtitle">Repasaste ${total} tarjeta${total !== 1 ? 's' : ''} en esta sesión</p>
+      <p class="results-subtitle">Repasaste ${total} tarjeta${total !== 1 ? 's' : ''}</p>
       <div class="results-stats">
         <div>
           <div class="results-stat-value" style="color:var(--danger)">${hard}</div>
@@ -911,9 +1303,9 @@ function renderResults() {
           <div class="results-stat-label">Fácil</div>
         </div>
       </div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary" data-action="backToDeck">Volver al mazo</button>
-        <button class="btn btn-secondary" data-action="home">Ir al inicio</button>
+      <div class="results-actions">
+        <button class="btn btn-primary btn-block" data-action="backToDeck">Volver al mazo</button>
+        <button class="btn btn-secondary btn-block" data-action="home">Ir al inicio</button>
       </div>
     </div>`;
 }
@@ -925,6 +1317,7 @@ function renderModal() {
   if (m.type === 'deck') {
     const isEdit = m.mode === 'edit';
     content = `
+      <div class="sheet-handle"></div>
       <h2 class="modal-title">${isEdit ? 'Editar mazo' : 'Nuevo mazo'}</h2>
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">Nombre</label>
@@ -943,6 +1336,7 @@ function renderModal() {
   } else if (m.type === 'card') {
     const isEdit = m.mode === 'editCard';
     content = `
+      <div class="sheet-handle"></div>
       <h2 class="modal-title">${isEdit ? 'Editar tarjeta' : 'Nueva tarjeta'}</h2>
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">Frente (pregunta)</label>
@@ -958,6 +1352,7 @@ function renderModal() {
       </div>`;
   } else if (m.type === 'confirmDelete') {
     content = `
+      <div class="sheet-handle"></div>
       <h2 class="modal-title">Confirmar eliminación</h2>
       <p style="color:var(--text-secondary);margin-bottom:8px">${m.message}</p>
       <div class="modal-actions">
@@ -972,11 +1367,6 @@ function renderModal() {
         ${content}
       </div>
     </div>`;
-}
-
-function esc(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ── Event Handling ──
@@ -1001,21 +1391,20 @@ document.getElementById('app').addEventListener('click', async (e) => {
       if (state.currentDeck) await openDeck(state.currentDeck.id);
       else goHome();
       break;
-
-    // Deck modals
     case 'showCreateDeck':
       state.modal = { type: 'deck', mode: 'create', emoji: '📚' };
       render();
-      setTimeout(() => document.getElementById('modal-name')?.focus(), 50);
+      setTimeout(() => document.getElementById('modal-name')?.focus(), 100);
       break;
-    case 'showEditDeck':
-      const deck = state.decks.find(d => d.id === id) || state.currentDeck;
-      state.modal = { type: 'deck', mode: 'edit', deckId: deck.id, name: deck.name, emoji: deck.emoji };
+    case 'showEditDeck': {
+      const dk = state.decks.find(d => d.id === id) || state.currentDeck;
+      state.modal = { type: 'deck', mode: 'edit', deckId: dk.id, name: dk.name, emoji: dk.emoji };
       render();
-      setTimeout(() => document.getElementById('modal-name')?.focus(), 50);
+      setTimeout(() => document.getElementById('modal-name')?.focus(), 100);
       break;
+    }
     case 'showDeleteDeck':
-      state.modal = { type: 'confirmDelete', target: 'deck', targetId: id || state.currentDeck?.id, message: '¿Estás seguro de que quieres eliminar este mazo y todas sus tarjetas? Esta acción no se puede deshacer.' };
+      state.modal = { type: 'confirmDelete', target: 'deck', targetId: id || state.currentDeck?.id, message: '¿Eliminar este mazo y todas sus tarjetas? No se puede deshacer.' };
       render();
       break;
     case 'selectEmoji':
@@ -1023,22 +1412,20 @@ document.getElementById('app').addEventListener('click', async (e) => {
       break;
     case 'submitDeck': {
       const name = document.getElementById('modal-name')?.value.trim();
-      if (!name) { toast('Escribe un nombre para el mazo'); return; }
+      if (!name) { toast('Escribe un nombre'); return; }
       await saveDeck(name, state.modal.emoji || '📚');
       break;
     }
-
-    // Card modals
     case 'showCreateCard':
       state.modal = { type: 'card', mode: 'createCard' };
       render();
-      setTimeout(() => document.getElementById('modal-front')?.focus(), 50);
+      setTimeout(() => document.getElementById('modal-front')?.focus(), 100);
       break;
     case 'showEditCard': {
       const card = state.cards.find(c => c.id === id);
       state.modal = { type: 'card', mode: 'editCard', cardId: id, front: card.front, back: card.back };
       render();
-      setTimeout(() => document.getElementById('modal-front')?.focus(), 50);
+      setTimeout(() => document.getElementById('modal-front')?.focus(), 100);
       break;
     }
     case 'showDeleteCard':
@@ -1052,33 +1439,38 @@ document.getElementById('app').addEventListener('click', async (e) => {
       await saveCard(front, back);
       break;
     }
-
-    // Delete confirm
     case 'confirmDelete':
       if (state.modal.target === 'deck') await deleteDeck(state.modal.targetId);
       else if (state.modal.target === 'card') await deleteCard(state.modal.targetId);
       break;
-
-    // Modal
     case 'closeModal': state.modal = null; render(); break;
     case 'overlayClick': state.modal = null; render(); break;
+    // Auth
+    case 'submitAuth': await submitAuth(); break;
+    case 'toggleAuth':
+      state.authMode = state.authMode === 'login' ? 'register' : 'login';
+      state.authError = null;
+      render();
+      setTimeout(() => document.getElementById('auth-username')?.focus(), 50);
+      break;
+    case 'logout': logout(); break;
   }
 });
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
+  if (state.view === 'login') {
+    if (e.key === 'Enter') { e.preventDefault(); submitAuth(); }
+    return;
+  }
   if (state.modal) {
     if (e.key === 'Escape') { state.modal = null; render(); }
     if (e.key === 'Enter' && !e.shiftKey) {
-      const action = state.modal.type === 'deck' ? 'submitDeck' : state.modal.type === 'card' ? 'submitCard' : null;
-      if (action) {
-        e.preventDefault();
-        document.querySelector(`[data-action="${action}"]`)?.click();
-      }
+      const act = state.modal.type === 'deck' ? 'submitDeck' : state.modal.type === 'card' ? 'submitCard' : null;
+      if (act) { e.preventDefault(); document.querySelector(`[data-action="${act}"]`)?.click(); }
     }
     return;
   }
-
   if (state.view === 'study') {
     if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); flipCard(); }
     if (state.flipped) {
@@ -1093,9 +1485,14 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ── PWA ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
 // ── Init ──
 applyTheme();
-loadDecks();
+checkAuth();
 </script>
 </body>
 </html>
