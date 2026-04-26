@@ -1,25 +1,32 @@
 {
+  "id": "/?source=pwa",
   "name": "Mnemo — Estudio con Tarjetas",
   "short_name": "Mnemo",
   "description": "Estudia con tarjetas y repetición espaciada",
-  "start_url": "/",
+  "lang": "es",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#F5F0E6",
   "theme_color": "#C25E30",
-  "orientation": "portrait-primary",
-  "categories": ["education"],
+  "orientation": "portrait",
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
     {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
+      "name": "Mis mazos",
+      "short_name": "Mazos",
+      "description": "Abrir lista de mazos",
+      "url": "/?source=pwa",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     }
   ]
 }

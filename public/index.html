@@ -2,12 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>Mnemo — Estudio con Tarjetas</title>
-  <meta name="theme-color" content="#C25E30">
+  <meta name="theme-color" content="#F5F0E6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Mnemo">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="color-scheme" content="light dark">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/icon.svg">
@@ -70,7 +74,7 @@
       --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
     }
 
-    html { height: 100%; }
+    html { height: 100%; touch-action: manipulation; }
     body {
       font-family: 'Work Sans', -apple-system, sans-serif;
       background: var(--bg);
@@ -80,7 +84,14 @@
       transition: background 0.4s, color 0.3s;
       -webkit-font-smoothing: antialiased;
       -webkit-tap-highlight-color: transparent;
-      overscroll-behavior: none;
+      overscroll-behavior-y: none;
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+    }
+    button, [data-action] { touch-action: manipulation; }
+    @supports (height: 100dvh) {
+      .auth-view { min-height: 100dvh; }
+      .study-view { height: 100dvh; }
     }
 
     /* ── Layout ── */
@@ -395,7 +406,28 @@
       z-index: 90;
       padding-top: var(--safe-top);
       animation: fadeIn 0.25s ease;
+      overscroll-behavior: contain;
+      touch-action: none;
     }
+    .study-card-area { touch-action: pan-y; }
+    .flashcard {
+      will-change: transform;
+      transition: transform 0.18s ease-out;
+    }
+    .flashcard.swiping { transition: none; }
+    .swipe-hint {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-family: 'Fraunces', serif;
+      font-size: 28px; font-weight: 700;
+      padding: 12px 22px; border-radius: 999px;
+      opacity: 0; transition: opacity 0.15s;
+      pointer-events: none;
+      letter-spacing: 0.5px;
+    }
+    .swipe-hint.left { left: 24px; background: var(--danger); color: #fff; transform: translateY(-50%) rotate(-8deg); }
+    .swipe-hint.right { right: 24px; background: var(--success); color: #fff; transform: translateY(-50%) rotate(8deg); }
+    .swipe-hint.top { left: 50%; top: 14%; transform: translateX(-50%); background: var(--warning); color: #fff; }
+    .swipe-hint.show { opacity: 1; }
     .study-topbar {
       padding: 12px 20px;
       padding-left: max(20px, var(--safe-left));
@@ -677,6 +709,116 @@
     .stagger-5 { animation-delay: 0.15s; }
     .stagger-6 { animation-delay: 0.18s; }
 
+    /* ── Skeletons ── */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, var(--border-light) 0%, var(--border) 50%, var(--border-light) 100%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite linear;
+      border-radius: var(--radius-sm);
+    }
+    .skel-deck {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .skel-emoji { width: 56px; height: 56px; border-radius: var(--radius-sm); flex-shrink: 0; }
+    .skel-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .skel-line { height: 14px; }
+    .skel-line.short { width: 40%; }
+    .skel-line.med { width: 70%; }
+    .skel-bar { height: 4px; margin-top: 6px; }
+
+    /* ── Install banner ── */
+    .install-banner {
+      position: fixed;
+      left: max(12px, var(--safe-left));
+      right: max(12px, var(--safe-right));
+      bottom: max(12px, calc(var(--safe-bottom) + 8px));
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-lg);
+      z-index: 60;
+      display: flex; align-items: center; gap: 12px;
+      animation: sheetUp 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      max-width: 520px; margin: 0 auto;
+    }
+    .install-banner-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: var(--accent-soft);
+      border-radius: var(--radius-xs);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .install-banner-text { flex: 1; min-width: 0; }
+    .install-banner-title { font-weight: 700; font-size: 14px; line-height: 1.2; }
+    .install-banner-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .install-banner-btn {
+      background: var(--accent); color: #fff;
+      padding: 8px 14px; border-radius: var(--radius-xs);
+      font-weight: 700; font-size: 13px; border: none;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .install-banner-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-tertiary); font-size: 18px;
+      width: 28px; height: 28px; flex-shrink: 0;
+    }
+
+    /* ── Offline banner ── */
+    .offline-banner {
+      position: fixed;
+      top: max(0px, var(--safe-top));
+      left: 0; right: 0;
+      background: var(--warning);
+      color: #fff;
+      text-align: center;
+      font-size: 12px; font-weight: 600;
+      padding: 6px 12px;
+      z-index: 200;
+      animation: fadeIn 0.2s ease;
+    }
+
+    /* ── Pull to refresh ── */
+    .ptr {
+      display: flex; align-items: center; justify-content: center;
+      height: 0;
+      overflow: hidden;
+      color: var(--text-tertiary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: height 0.2s;
+      gap: 8px;
+    }
+    .ptr.armed { color: var(--accent); }
+    .ptr-spin {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Page transitions ── */
+    @keyframes pageInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pageInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .page-in-right { animation: pageInRight 0.22s cubic-bezier(0.32, 0.72, 0, 1); }
+    .page-in-left { animation: pageInLeft 0.22s cubic-bezier(0.32, 0.72, 0, 1); }
+
     /* ── Auth View ── */
     .auth-view {
       min-height: 100vh;
@@ -768,6 +910,7 @@
 let state = {
   view: 'loading',
   decks: [],
+  decksLoading: false,
   currentDeck: null,
   cards: [],
   studyCards: [],
@@ -780,7 +923,11 @@ let state = {
   token: localStorage.getItem('mnemo-token'),
   user: null,
   authMode: 'login',
-  authError: null
+  authError: null,
+  // Mobile/PWA
+  online: navigator.onLine,
+  installPrompt: null,
+  installDismissed: localStorage.getItem('mnemo-install-dismissed') === '1'
 };
 
 const EMOJIS = ['📚','📖','🧠','💡','🌍','🔬','🧪','🎨','🎵','🔢','📐','🌿','💻','🗣️','✏️','🏛️','⚡','🧬','📊','🎯','🏥','⚖️','🎭','🌊','🚀','🎓','📝','🔤','🗺️','🧮'];
@@ -806,8 +953,14 @@ function getGreeting() {
   if (h < 19) return 'Buenas tardes';
   return 'Buenas noches';
 }
-function haptic() {
-  if ('vibrate' in navigator) navigator.vibrate(8);
+function haptic(ms = 8) {
+  if ('vibrate' in navigator) navigator.vibrate(ms);
+}
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
 // ── API ──
@@ -841,7 +994,7 @@ async function submitAuth() {
     state.user = data.user;
     localStorage.setItem('mnemo-token', data.token);
     state.view = 'dashboard';
-    await loadDecks();
+    await loadDecks(true);
   } catch (e) {
     state.authError = e.message;
     render();
@@ -868,7 +1021,7 @@ async function checkAuth() {
   try {
     state.user = await api('GET', '/me');
     state.view = 'dashboard';
-    await loadDecks();
+    await loadDecks(true);
   } catch (e) {
     state.token = null;
     localStorage.removeItem('mnemo-token');
@@ -878,13 +1031,18 @@ async function checkAuth() {
 }
 
 // ── Actions ──
-async function loadDecks() {
+async function loadDecks(showSkeleton = false) {
+  if (showSkeleton) {
+    state.decksLoading = true;
+    render();
+  }
   try {
     state.decks = await api('GET', '/decks');
   } catch (e) {
-    toast('Error de conexión');
+    if (state.online) toast('Error de conexión');
     state.decks = [];
   }
+  state.decksLoading = false;
   render();
 }
 
@@ -1009,22 +1167,29 @@ function toast(msg) {
 function render() {
   const app = document.getElementById('app');
 
+  let html = '';
+  if (!state.online) html += `<div class="offline-banner">Sin conexión · trabajando en modo offline</div>`;
+
   if (state.view === 'loading') {
-    app.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--text-tertiary)">Cargando...</div>';
+    html += '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;color:var(--text-tertiary)"><div class="ptr-spin"></div></div>';
+    app.innerHTML = html;
     return;
   }
 
   if (state.view === 'login') {
-    app.innerHTML = renderAuth();
+    html += renderAuth();
+    app.innerHTML = html;
     return;
   }
 
   if (state.view === 'study') {
-    app.innerHTML = renderStudy();
+    html += renderStudy();
+    app.innerHTML = html;
+    setupStudyGestures();
     return;
   }
 
-  let html = renderHeader();
+  html += renderHeader();
   html += '<main class="container">';
   switch (state.view) {
     case 'dashboard': html += renderDashboard(); break;
@@ -1033,7 +1198,32 @@ function render() {
   }
   html += '</main>';
   if (state.modal) html += renderModal();
+  if (shouldShowInstallBanner()) html += renderInstallBanner();
   app.innerHTML = html;
+
+  if (state.view === 'dashboard') setupPullToRefresh();
+}
+
+function shouldShowInstallBanner() {
+  if (state.installDismissed) return false;
+  if (isStandalone()) return false;
+  if (!state.user) return false;
+  if (state.installPrompt) return true;
+  return isIOS();
+}
+
+function renderInstallBanner() {
+  const ios = isIOS() && !state.installPrompt;
+  return `
+    <div class="install-banner" id="install-banner">
+      <div class="install-banner-icon">📲</div>
+      <div class="install-banner-text">
+        <div class="install-banner-title">Instala Mnemo</div>
+        <div class="install-banner-desc">${ios ? 'Compartir → Añadir a inicio' : 'Úsala como app nativa'}</div>
+      </div>
+      ${ios ? '' : `<button class="install-banner-btn" data-action="installApp">Instalar</button>`}
+      <button class="install-banner-close" data-action="dismissInstall" aria-label="Cerrar">×</button>
+    </div>`;
 }
 
 function renderAuth() {
@@ -1083,6 +1273,15 @@ function renderHeader() {
 }
 
 function renderDashboard() {
+  if (state.decksLoading && state.decks.length === 0) {
+    let s = `<div id="ptr" class="ptr"></div><div class="greeting">${getGreeting()}</div><p class="greeting-sub">Cargando tus mazos…</p><div class="deck-grid">`;
+    for (let i = 0; i < 4; i++) {
+      s += `<div class="skel-deck"><div class="skeleton skel-emoji"></div><div class="skel-lines"><div class="skeleton skel-line med"></div><div class="skeleton skel-line short"></div><div class="skeleton skel-bar"></div></div></div>`;
+    }
+    s += '</div>';
+    return s;
+  }
+
   const totalDue = state.decks.reduce((s, d) => s + d.due_count, 0);
 
   if (state.decks.length === 0) {
@@ -1096,6 +1295,7 @@ function renderDashboard() {
   }
 
   let html = `
+    <div id="ptr" class="ptr"></div>
     <div class="animate-in">
       <div class="greeting">${getGreeting()}</div>
       <p class="greeting-sub">${totalDue > 0 ? `Tienes ${totalDue} tarjeta${totalDue !== 1 ? 's' : ''} por repasar` : 'Estás al día. ¡Bien hecho!'}</p>
@@ -1229,8 +1429,11 @@ function renderStudy() {
         </div>
       </div>
 
-      <div class="study-card-area" data-action="flip">
-        <div class="flashcard ${state.flipped ? 'flipped' : ''}">
+      <div class="study-card-area" data-action="flip" id="study-area">
+        <div class="swipe-hint left" id="hint-left">Difícil</div>
+        <div class="swipe-hint top" id="hint-top">Normal</div>
+        <div class="swipe-hint right" id="hint-right">Fácil</div>
+        <div class="flashcard ${state.flipped ? 'flipped' : ''}" id="flashcard">
           <div class="flashcard-inner">
             <div class="flashcard-face flashcard-front">
               <div class="flashcard-text" style="font-size:${frontSize}">${escNl(card.front)}</div>
@@ -1265,7 +1468,7 @@ function renderStudy() {
             </button>
           </div>
         ` : `
-          <div class="study-hint-bottom">Toca la tarjeta o presiona Espacio</div>
+          <div class="study-hint-bottom">Toca para voltear · desliza ← → ↑ tras voltear</div>
         `}
       </div>
     </div>`;
@@ -1369,6 +1572,158 @@ function renderModal() {
     </div>`;
 }
 
+// ── Swipe gestures (study) ──
+function setupStudyGestures() {
+  const area = document.getElementById('study-area');
+  const card = document.getElementById('flashcard');
+  if (!area || !card) return;
+  const hintL = document.getElementById('hint-left');
+  const hintR = document.getElementById('hint-right');
+  const hintT = document.getElementById('hint-top');
+
+  let startX = 0, startY = 0, dx = 0, dy = 0, dragging = false, startedFromTap = false;
+  const THRESH = 90;
+
+  area.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY; dx = 0; dy = 0;
+    dragging = true; startedFromTap = true;
+    card.classList.add('swiping');
+  }, { passive: true });
+
+  area.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    dx = t.clientX - startX;
+    dy = t.clientY - startY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) startedFromTap = false;
+    if (!state.flipped) {
+      card.style.transform = `translate(${dx * 0.4}px, ${dy * 0.2}px) rotate(${dx * 0.02}deg)`;
+      return;
+    }
+    card.style.transform = `translate(${dx}px, ${dy < 0 ? dy * 0.6 : dy * 0.3}px) rotate(${dx * 0.06}deg)`;
+    const rightOn = dx > 40 && Math.abs(dx) > Math.abs(dy);
+    const leftOn = dx < -40 && Math.abs(dx) > Math.abs(dy);
+    const topOn = dy < -50 && Math.abs(dy) > Math.abs(dx);
+    hintR && hintR.classList.toggle('show', rightOn);
+    hintL && hintL.classList.toggle('show', leftOn);
+    hintT && hintT.classList.toggle('show', topOn);
+  }, { passive: true });
+
+  area.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    card.classList.remove('swiping');
+    hintL && hintL.classList.remove('show');
+    hintR && hintR.classList.remove('show');
+    hintT && hintT.classList.remove('show');
+
+    if (startedFromTap && Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+      card.style.transform = '';
+      flipCard();
+      return;
+    }
+
+    if (state.flipped && Math.abs(dx) > THRESH && Math.abs(dx) > Math.abs(dy)) {
+      const direction = dx > 0 ? 1 : -1;
+      card.style.transition = 'transform 0.25s ease-out, opacity 0.25s';
+      card.style.transform = `translate(${direction * window.innerWidth}px, 0) rotate(${direction * 20}deg)`;
+      card.style.opacity = '0';
+      haptic(12);
+      setTimeout(() => rateCard(direction > 0 ? 3 : 1), 180);
+      return;
+    }
+    if (state.flipped && dy < -THRESH && Math.abs(dy) > Math.abs(dx)) {
+      card.style.transition = 'transform 0.25s ease-out, opacity 0.25s';
+      card.style.transform = `translate(0, ${-window.innerHeight}px)`;
+      card.style.opacity = '0';
+      haptic(12);
+      setTimeout(() => rateCard(2), 180);
+      return;
+    }
+    card.style.transform = '';
+  });
+
+  area.addEventListener('touchcancel', () => {
+    dragging = false;
+    card.classList.remove('swiping');
+    card.style.transform = '';
+    hintL && hintL.classList.remove('show');
+    hintR && hintR.classList.remove('show');
+    hintT && hintT.classList.remove('show');
+  });
+}
+
+// ── Pull to refresh ──
+function setupPullToRefresh() {
+  const ptr = document.getElementById('ptr');
+  if (!ptr) return;
+  let startY = 0, pulling = false, dist = 0;
+  const MAX = 90, TRIGGER = 70;
+
+  const onStart = (e) => {
+    if (window.scrollY > 0) return;
+    const t = e.touches[0];
+    startY = t.clientY; pulling = true; dist = 0;
+  };
+  const onMove = (e) => {
+    if (!pulling) return;
+    const t = e.touches[0];
+    dist = t.clientY - startY;
+    if (dist <= 0) { pulling = false; ptr.style.height = '0'; return; }
+    const h = Math.min(MAX, dist * 0.55);
+    ptr.style.height = h + 'px';
+    if (dist > TRIGGER) {
+      ptr.classList.add('armed');
+      ptr.innerHTML = '↑ Suelta para actualizar';
+    } else {
+      ptr.classList.remove('armed');
+      ptr.innerHTML = '↓ Tira para actualizar';
+    }
+  };
+  const onEnd = async () => {
+    if (!pulling) return;
+    pulling = false;
+    if (dist > TRIGGER) {
+      ptr.innerHTML = '<div class="ptr-spin"></div> Actualizando…';
+      ptr.style.height = '40px';
+      haptic(10);
+      await loadDecks();
+    } else {
+      ptr.style.height = '0';
+    }
+  };
+
+  document.addEventListener('touchstart', onStart, { passive: true });
+  document.addEventListener('touchmove', onMove, { passive: true });
+  document.addEventListener('touchend', onEnd);
+}
+
+// ── Install / Offline ──
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  state.installPrompt = e;
+  if (state.view !== 'loading' && state.view !== 'login') render();
+});
+window.addEventListener('appinstalled', () => {
+  state.installPrompt = null;
+  state.installDismissed = true;
+  localStorage.setItem('mnemo-install-dismissed', '1');
+  toast('App instalada');
+  render();
+});
+window.addEventListener('online', () => {
+  state.online = true;
+  render();
+  if (state.view === 'dashboard') loadDecks();
+});
+window.addEventListener('offline', () => {
+  state.online = false;
+  toast('Sin conexión');
+  render();
+});
+
 // ── Event Handling ──
 document.getElementById('app').addEventListener('click', async (e) => {
   const target = e.target.closest('[data-action]');
@@ -1454,6 +1809,25 @@ document.getElementById('app').addEventListener('click', async (e) => {
       setTimeout(() => document.getElementById('auth-username')?.focus(), 50);
       break;
     case 'logout': logout(); break;
+    case 'installApp': {
+      if (state.installPrompt) {
+        const p = state.installPrompt;
+        state.installPrompt = null;
+        p.prompt();
+        const choice = await p.userChoice.catch(() => null);
+        if (choice && choice.outcome !== 'accepted') {
+          state.installDismissed = true;
+          localStorage.setItem('mnemo-install-dismissed', '1');
+        }
+        render();
+      }
+      break;
+    }
+    case 'dismissInstall':
+      state.installDismissed = true;
+      localStorage.setItem('mnemo-install-dismissed', '1');
+      render();
+      break;
   }
 });
 
@@ -1487,7 +1861,23 @@ document.addEventListener('keydown', (e) => {
 
 // ── PWA ──
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          nw.postMessage('skipWaiting');
+        }
+      });
+    });
+  }).catch(() => {});
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    location.reload();
+  });
 }
 
 // ── Init ──

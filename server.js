@@ -25,6 +25,12 @@ const pool = new Pool({
 const JWT_SECRET = process.env.JWT_SECRET || 'mnemo-dev-fallback';
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  if (req.path === '/sw.js' || req.path === '/manifest.json') {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 const h = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(err => {
