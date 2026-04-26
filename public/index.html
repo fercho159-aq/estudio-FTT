@@ -45,9 +45,21 @@
       --shadow-sm: 0 1px 3px rgba(42,37,32,0.06);
       --shadow: 0 4px 16px rgba(42,37,32,0.08);
       --shadow-lg: 0 12px 40px rgba(42,37,32,0.12);
-      --radius: 16px;
-      --radius-sm: 12px;
-      --radius-xs: 8px;
+      --radius: 18px;
+      --radius-sm: 14px;
+      --radius-xs: 10px;
+      /* Liquid Glass tokens */
+      --glass-bg: rgba(255, 253, 247, 0.55);
+      --glass-bg-strong: rgba(255, 253, 247, 0.78);
+      --glass-bg-thin: rgba(255, 253, 247, 0.32);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --glass-border-soft: rgba(255, 255, 255, 0.35);
+      --glass-highlight: rgba(255, 255, 255, 0.55);
+      --glass-shadow: 0 12px 40px rgba(42, 37, 32, 0.10), 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 -1px 0 rgba(42, 37, 32, 0.04) inset;
+      --glass-blur: saturate(180%) blur(28px);
+      --ambient-1: radial-gradient(60% 50% at 15% 0%, rgba(194,94,48,0.10), transparent 60%);
+      --ambient-2: radial-gradient(50% 40% at 100% 100%, rgba(90,138,98,0.08), transparent 60%);
+      --ambient-3: radial-gradient(40% 35% at 80% 30%, rgba(196,152,42,0.06), transparent 60%);
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-left: env(safe-area-inset-left, 0px);
@@ -75,12 +87,28 @@
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
       --shadow: 0 4px 16px rgba(0,0,0,0.25);
       --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
+      /* Liquid Glass tokens (dark) */
+      --glass-bg: rgba(28, 25, 22, 0.55);
+      --glass-bg-strong: rgba(30, 28, 24, 0.82);
+      --glass-bg-thin: rgba(28, 25, 22, 0.35);
+      --glass-border: rgba(255, 255, 255, 0.10);
+      --glass-border-soft: rgba(255, 255, 255, 0.06);
+      --glass-highlight: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 14px 44px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
+      --ambient-1: radial-gradient(60% 50% at 15% 0%, rgba(232,118,74,0.18), transparent 60%);
+      --ambient-2: radial-gradient(50% 40% at 100% 100%, rgba(112,168,120,0.12), transparent 60%);
+      --ambient-3: radial-gradient(40% 35% at 80% 30%, rgba(212,168,67,0.10), transparent 60%);
     }
 
     html { height: 100%; touch-action: manipulation; }
     body {
       font-family: 'Work Sans', -apple-system, sans-serif;
-      background: var(--bg);
+      background:
+        var(--ambient-1),
+        var(--ambient-2),
+        var(--ambient-3),
+        var(--bg);
+      background-attachment: fixed;
       color: var(--text);
       line-height: 1.5;
       min-height: 100%;
@@ -110,10 +138,16 @@
     .header {
       padding: 14px 0;
       padding-top: max(14px, var(--safe-top));
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-surface);
+      border-bottom: 1px solid var(--glass-border-soft);
+      background: var(--glass-bg-strong);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: 0 1px 0 var(--glass-border) inset, 0 8px 24px rgba(42,37,32,0.04);
       position: sticky; top: 0; z-index: 50;
       transition: background 0.4s, border-color 0.3s;
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .header { background: var(--bg-surface); }
     }
     .header-inner {
       display: flex; align-items: center; justify-content: space-between;
@@ -233,19 +267,25 @@
       gap: 12px; padding-bottom: 100px;
     }
     .deck-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border-soft);
       border-radius: var(--radius);
       padding: 20px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.2s, background 0.2s;
       position: relative;
       display: flex; gap: 16px; align-items: flex-start;
       -webkit-user-select: none; user-select: none;
+      box-shadow: var(--glass-shadow);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .deck-card { background: var(--bg-surface); }
     }
     .deck-card:active {
       transform: scale(0.98);
-      background: var(--border-light);
+      background: var(--glass-bg-strong);
     }
     .deck-emoji {
       font-size: 32px;
@@ -292,20 +332,28 @@
     /* ── FAB ── */
     .fab {
       position: fixed;
-      bottom: max(24px, var(--safe-bottom));
+      /* sit above the bottom nav (≈80px + safe inset) */
+      bottom: calc(96px + var(--safe-bottom));
       right: max(20px, var(--safe-right));
       width: 56px; height: 56px;
       border-radius: 50%;
-      background: var(--accent);
+      background: linear-gradient(180deg, var(--accent-hover), var(--accent));
       color: #fff;
-      border: none; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.22);
+      cursor: pointer;
       font-size: 28px; font-weight: 300;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 20px rgba(194,94,48,0.35);
-      z-index: 40;
-      transition: all 0.15s;
+      box-shadow:
+        0 10px 28px rgba(194,94,48,0.35),
+        0 1px 0 rgba(255,255,255,0.35) inset,
+        0 -8px 12px rgba(0,0,0,0.10) inset;
+      z-index: 110;
+      transition: transform 0.15s;
     }
-    .fab:active { transform: scale(0.9); }
+    .fab:active { transform: scale(0.92); }
+    body:not([data-bottom-nav="1"]) .fab {
+      bottom: max(24px, var(--safe-bottom));
+    }
 
     /* ── Deck Detail ── */
     .deck-hero {
@@ -334,9 +382,16 @@
       margin-bottom: 16px;
     }
     .stat-card {
-      background: var(--bg-surface); border: 1px solid var(--border);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border-soft);
       border-radius: var(--radius-sm); padding: 14px 8px; text-align: center;
+      box-shadow: 0 6px 18px rgba(42,37,32,0.06), 0 1px 0 var(--glass-highlight) inset;
       transition: background 0.3s, border-color 0.3s;
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .stat-card { background: var(--bg-surface); }
     }
     .stat-value {
       font-family: 'Fraunces', serif;
@@ -372,12 +427,14 @@
     .card-item {
       display: flex; align-items: center; gap: 12px;
       padding: 14px 12px; border-radius: var(--radius-sm);
-      background: var(--bg-surface);
-      border: 1px solid transparent;
+      background: var(--glass-bg-thin);
+      -webkit-backdrop-filter: saturate(160%) blur(18px);
+      backdrop-filter: saturate(160%) blur(18px);
+      border: 1px solid var(--glass-border-soft);
       transition: all 0.15s;
       -webkit-user-select: none; user-select: none;
     }
-    .card-item:active { background: var(--border-light); }
+    .card-item:active { background: var(--glass-bg-strong); }
     .card-texts { flex: 1; min-width: 0; }
     .card-front-preview {
       font-size: 14px; font-weight: 500;
@@ -451,13 +508,16 @@
     .study-close {
       width: 40px; height: 40px;
       border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--bg-surface);
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg-strong);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
       color: var(--text-secondary);
       font-size: 20px;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.10), 0 1px 0 var(--glass-highlight) inset;
       transition: all 0.15s;
     }
     .study-close:active { transform: scale(0.9); background: var(--border-light); }
@@ -515,15 +575,24 @@
       -webkit-overflow-scrolling: touch;
     }
     .flashcard-front {
-      background: var(--bg-surface);
-      border: 1.5px solid var(--border);
-      box-shadow: var(--shadow-lg), 0 1px 0 var(--border);
+      background: var(--glass-bg-strong);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
     }
     .flashcard-back {
       transform: rotateY(180deg);
-      background: linear-gradient(135deg, var(--accent-soft), rgba(194,94,48,0.04));
+      background:
+        linear-gradient(135deg, var(--accent-soft), rgba(194,94,48,0.04)),
+        var(--glass-bg-strong);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
       border: 1.5px solid var(--accent);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--glass-shadow);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .flashcard-front { background: var(--bg-surface); }
     }
     .flashcard-text {
       font-family: 'Fraunces', serif;
@@ -630,26 +699,35 @@
     /* ── Modal (bottom sheet on mobile) ── */
     .modal-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45);
+      background: rgba(0,0,0,0.35);
       display: flex;
       align-items: flex-end;
       justify-content: center;
       z-index: 100;
       animation: fadeIn 0.15s ease;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
     }
     .modal {
-      background: var(--bg-surface);
-      border-radius: var(--radius) var(--radius) 0 0;
+      background: var(--glass-bg-strong);
+      -webkit-backdrop-filter: saturate(200%) blur(36px);
+      backdrop-filter: saturate(200%) blur(36px);
+      border: 1px solid var(--glass-border);
+      border-bottom: 0;
+      border-radius: 28px 28px 0 0;
       padding: 8px 24px 24px;
       padding-bottom: max(24px, calc(var(--safe-bottom) + 16px));
       width: 100%; max-width: 520px;
       max-height: 90vh;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      box-shadow: var(--shadow-lg);
+      box-shadow:
+        0 -12px 40px rgba(0,0,0,0.18),
+        0 1px 0 var(--glass-highlight) inset;
       animation: sheetUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .modal { background: var(--bg-surface); }
     }
     .sheet-handle {
       width: 36px; height: 4px;
@@ -701,10 +779,14 @@
       position: fixed;
       bottom: max(24px, calc(var(--safe-bottom) + 12px));
       left: 50%; transform: translateX(-50%);
-      background: var(--text); color: var(--bg);
-      padding: 12px 24px; border-radius: var(--radius-sm);
+      background: rgba(42,37,32,0.86);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+      color: #fff;
+      padding: 12px 24px; border-radius: 999px;
       font-size: 14px; font-weight: 500;
-      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.10) inset;
       z-index: 200;
       animation: fadeUp 0.3s ease;
       max-width: calc(100vw - 40px);
@@ -761,15 +843,20 @@
       left: max(12px, var(--safe-left));
       right: max(12px, var(--safe-right));
       bottom: max(12px, calc(var(--safe-bottom) + 8px));
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
+      background: var(--glass-bg-strong);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius);
       padding: 14px 16px;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--glass-shadow);
       z-index: 60;
       display: flex; align-items: center; gap: 12px;
       animation: sheetUp 0.4s cubic-bezier(0.32, 0.72, 0, 1);
       max-width: 520px; margin: 0 auto;
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .install-banner { background: var(--bg-surface); }
     }
     .install-banner-icon {
       width: 40px; height: 40px; flex-shrink: 0;
@@ -943,12 +1030,18 @@
       margin-bottom: 16px;
     }
     .metric-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border-soft);
       border-radius: var(--radius);
       padding: 16px;
       display: flex; flex-direction: column;
       min-height: 120px;
+      box-shadow: var(--glass-shadow);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .metric-card { background: var(--bg-surface); }
     }
     .metric-icon {
       width: 36px; height: 36px;
@@ -981,11 +1074,17 @@
     .metric-bar-fill { height: 100%; transition: width 0.5s; }
 
     .analytics-section {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border-soft);
       border-radius: var(--radius);
       padding: 16px;
       margin-bottom: 16px;
+      box-shadow: var(--glass-shadow);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .analytics-section { background: var(--bg-surface); }
     }
     .analytics-section-title {
       font-family: 'Fraunces', serif;
@@ -1092,7 +1191,7 @@
       .metric-grid { grid-template-columns: repeat(4, 1fr); }
     }
 
-    /* ── Bottom Nav (Glass, mismo lenguaje visual) ── */
+    /* ── Bottom Nav (Liquid Glass pill) ── */
     .bottom-nav {
       position: fixed;
       left: max(16px, env(safe-area-inset-left, 16px));
@@ -1103,16 +1202,24 @@
       padding: 6px;
       max-width: 420px;
       margin: 0 auto;
-      background: rgba(255, 253, 247, 0.78);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      background: rgba(255, 253, 247, 0.92);
+      -webkit-backdrop-filter: saturate(200%) blur(34px);
+      backdrop-filter: saturate(200%) blur(34px);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      box-shadow:
+        0 18px 44px rgba(42,37,32,0.18),
+        0 1px 0 var(--glass-highlight) inset,
+        0 -1px 0 rgba(42,37,32,0.05) inset;
+      isolation: isolate;
     }
     [data-theme="dark"] .bottom-nav {
-      background: rgba(30, 28, 24, 0.72);
-      border-color: var(--border);
+      background: rgba(28, 25, 22, 0.92);
+      border-color: rgba(255,255,255,0.12);
+      box-shadow:
+        0 18px 44px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,255,255,0.10) inset,
+        0 -1px 0 rgba(0,0,0,0.5) inset;
     }
     @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
       .bottom-nav { background: var(--bg-surface); }
@@ -1122,22 +1229,30 @@
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       gap: 3px; padding: 8px 4px;
-      border-radius: var(--radius-sm);
+      border-radius: 999px;
       background: transparent;
       border: 0; cursor: pointer;
       color: var(--text-tertiary);
-      transition: color 0.18s ease, transform 0.18s ease;
+      transition: color 0.18s ease, transform 0.18s ease, background 0.2s ease;
       font-family: 'Work Sans', sans-serif;
       font-size: 10px; font-weight: 600;
       letter-spacing: 0.3px; text-transform: uppercase;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
     .bottom-nav-item .nav-icon {
       width: 22px; height: 22px;
       stroke-width: 1.8;
       transition: stroke-width 0.18s ease;
     }
-    .bottom-nav-item.active { color: var(--accent); }
+    .bottom-nav-item.active {
+      color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset;
+    }
+    [data-theme="dark"] .bottom-nav-item.active {
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
+    }
     .bottom-nav-item.active .nav-icon { stroke-width: 2.4; }
     .bottom-nav-item:active { transform: scale(0.94); }
     .bottom-nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
