@@ -2243,7 +2243,7 @@ function renderModal() {
 
   return `
     <div class="modal-overlay" data-action="overlayClick">
-      <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal">
         ${content}
       </div>
     </div>`;
@@ -2486,7 +2486,9 @@ document.getElementById('app').addEventListener('click', async (e) => {
       else if (state.modal.target === 'card') await deleteCard(state.modal.targetId);
       break;
     case 'closeModal': state.modal = null; render(); break;
-    case 'overlayClick': state.modal = null; render(); break;
+    case 'overlayClick':
+      if (e.target === target) { state.modal = null; render(); }
+      break;
     // Auth
     case 'submitAuth': await submitAuth(); break;
     case 'toggleAuth':

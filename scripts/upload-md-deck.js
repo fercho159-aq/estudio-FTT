@@ -64,7 +64,6 @@ function parseCards(body) {
     let backFirst = lines[aIdx].replace(/^A:\s*/, '').trim();
     const tail = [];
     for (let i = aIdx + 1; i < lines.length; i++) {
-      // preservar líneas (incluyendo vacías intermedias)
       tail.push(lines[i].replace(/^  /, ''));
     }
     while (tail.length && !tail[tail.length - 1].trim()) tail.pop();
@@ -82,13 +81,37 @@ function parseCards(body) {
   return cards;
 }
 
+// Parser de tabla markdown: | Frente | Reverso |
+function parseCardsTable(body) {
+  const lines = body.split('\n');
+  const cards = [];
+  let inTable = false;
+  const PIPE = '__ESC_PIPE__';
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line.startsWith('|')) { inTable = false; continue; }
+    if (/^\|\s*[-:]{2,}/.test(line)) { inTable = true; continue; }
+    if (!inTable && /Frente/i.test(line) && /Reverso/i.test(line)) continue;
+    if (!inTable) continue;
+    const cols = line.replace(/\\\|/g, PIPE).split('|').slice(1, -1)
+      .map(c => c.split(PIPE).join('|').trim());
+    if (cols.length < 2) continue;
+    const front = cols[0].replace(/<br\s*\/?>/gi, '\n').trim();
+    const back = cols[1].replace(/<br\s*\/?>/gi, '\n').trim();
+    if (front && back) cards.push({ front, back });
+  }
+  return cards;
+}
+
 async function main() {
   const md = fs.readFileSync(mdPath, 'utf8');
   const { meta, body } = parseFrontmatter(md);
   const deckName = meta.mazo || path.basename(mdPath, '.md');
   const emoji = meta.emoji || '📚';
-  const cards = parseCards(body);
+  let cards = parseCards(body);
+  if (cards.length === 0) cards = parseCardsTable(body);
   console.log(`Mazo: ${deckName} ${emoji} — ${cards.length} tarjetas`);
+  if (cards.length === 0) throw new Error('No se detectaron tarjetas (formatos: Q:/A: o tabla | Frente | Reverso |)');
 
   const { rows: [user] } = await pool.query(
     'SELECT id FROM users WHERE username = $1', [username.toLowerCase()]
