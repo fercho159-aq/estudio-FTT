@@ -226,6 +226,7 @@ app.post('/api/cards/:id/review', auth, h(async (req, res) => {
   if (!card) return res.status(404).json({ error: 'Tarjeta no encontrada' });
 
   let { interval_days, ease_factor, review_count, correct_count, lapse_count } = card;
+  const prev_interval = interval_days;
   lapse_count = lapse_count || 0;
   let next_review;
 
@@ -263,7 +264,100 @@ app.post('/api/cards/:id/review', auth, h(async (req, res) => {
      WHERE id=$7 RETURNING *`,
     [interval_days, ease_factor, review_count, correct_count, lapse_count, next_review, req.params.id]
   );
+  // Log para historial
+  pool.query(
+    `INSERT INTO card_reviews (card_id, user_id, rating, prev_interval, new_interval)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [req.params.id, req.user.id, rating, prev_interval, interval_days]
+  ).catch(e => console.error('review log fail:', e.message));
   res.json(updated);
+}));
+
+// ── Stats / Dashboard ──
+
+app.get('/api/stats', auth, h(async (req, res) => {
+  const userId = req.user.id;
+
+  const overall = await pool.query(`
+    SELECT
+      COUNT(*)::int AS total,
+      COUNT(CASE WHEN c.review_count > 0 THEN 1 END)::int AS reviewed,
+      COUNT(CASE WHEN c.review_count = 0 THEN 1 END)::int AS unseen,
+      COUNT(CASE WHEN c.next_review <= NOW() THEN 1 END)::int AS due,
+      COUNT(CASE WHEN c.interval_days >= 30 AND c.review_count >= 5
+                  AND (c.correct_count::float / NULLIF(c.review_count,0)) >= 0.85
+                  THEN 1 END)::int AS mastered,
+      COUNT(CASE WHEN COALESCE(c.lapse_count,0) >= 4 THEN 1 END)::int AS leeches,
+      COALESCE(SUM(c.review_count), 0)::int AS total_reviews,
+      COALESCE(SUM(c.correct_count), 0)::int AS total_correct,
+      COALESCE(SUM(c.lapse_count), 0)::int AS total_lapses,
+      ROUND(AVG(NULLIF(c.ease_factor, 0))::numeric, 2)::float AS avg_ease
+    FROM cards c
+    JOIN decks d ON c.deck_id = d.id
+    WHERE d.user_id = $1
+  `, [userId]);
+
+  const intervals = await pool.query(`
+    SELECT
+      COUNT(CASE WHEN c.review_count = 0 THEN 1 END)::int AS new_cards,
+      COUNT(CASE WHEN c.review_count > 0 AND c.interval_days < 1 THEN 1 END)::int AS d_lt1,
+      COUNT(CASE WHEN c.interval_days >= 1 AND c.interval_days < 7 THEN 1 END)::int AS d_1_7,
+      COUNT(CASE WHEN c.interval_days >= 7 AND c.interval_days < 30 THEN 1 END)::int AS d_7_30,
+      COUNT(CASE WHEN c.interval_days >= 30 AND c.interval_days < 90 THEN 1 END)::int AS d_30_90,
+      COUNT(CASE WHEN c.interval_days >= 90 THEN 1 END)::int AS d_90p
+    FROM cards c
+    JOIN decks d ON c.deck_id = d.id
+    WHERE d.user_id = $1
+  `, [userId]);
+
+  const leeches = await pool.query(`
+    SELECT c.id, c.front, c.lapse_count, c.review_count, c.correct_count, c.interval_days,
+           d.name AS deck_name, d.emoji AS deck_emoji
+    FROM cards c
+    JOIN decks d ON c.deck_id = d.id
+    WHERE d.user_id = $1 AND COALESCE(c.lapse_count, 0) >= 4
+    ORDER BY c.lapse_count DESC, c.review_count DESC
+    LIMIT 10
+  `, [userId]);
+
+  const perDeck = await pool.query(`
+    SELECT d.id, d.name, d.emoji,
+      COUNT(c.id)::int AS total,
+      COUNT(CASE WHEN c.review_count > 0 THEN 1 END)::int AS reviewed,
+      COUNT(CASE WHEN c.interval_days >= 30 AND c.review_count >= 5
+                  AND (c.correct_count::float / NULLIF(c.review_count,0)) >= 0.85
+                  THEN 1 END)::int AS mastered,
+      COUNT(CASE WHEN COALESCE(c.lapse_count,0) >= 4 THEN 1 END)::int AS leeches,
+      COUNT(CASE WHEN c.next_review <= NOW() THEN 1 END)::int AS due,
+      COALESCE(SUM(c.review_count), 0)::int AS total_reviews,
+      COALESCE(SUM(c.correct_count), 0)::int AS total_correct
+    FROM decks d
+    LEFT JOIN cards c ON c.deck_id = d.id
+    WHERE d.user_id = $1
+    GROUP BY d.id
+    ORDER BY d.created_at DESC
+  `, [userId]);
+
+  // Actividad últimos 14 días (a partir del log)
+  const activity = await pool.query(`
+    SELECT
+      to_char(reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS day,
+      COUNT(*)::int AS reviews,
+      COUNT(CASE WHEN rating > 0 THEN 1 END)::int AS correct,
+      COUNT(CASE WHEN rating = 0 THEN 1 END)::int AS lapses
+    FROM card_reviews
+    WHERE user_id = $1 AND reviewed_at >= NOW() - INTERVAL '14 days'
+    GROUP BY day
+    ORDER BY day
+  `, [userId]);
+
+  res.json({
+    overall: overall.rows[0],
+    intervals: intervals.rows[0],
+    leeches: leeches.rows,
+    perDeck: perDeck.rows,
+    activity: activity.rows
+  });
 }));
 
 app.get('*', (req, res) => {

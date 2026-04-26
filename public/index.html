@@ -912,6 +912,230 @@
       .btn-primary:hover { box-shadow: var(--shadow); }
       .deck-card:hover { box-shadow: var(--shadow); border-color: var(--accent); }
     }
+
+    /* ── Analytics ── */
+    .analytics-view { padding: 0 0 24px; }
+    .analytics-back {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 0 16px;
+    }
+    .analytics-title {
+      font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .metric-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+    .metric-value {
+      font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600;
+      line-height: 1; letter-spacing: -1px;
+      color: var(--text);
+    }
+    .metric-of { font-size: 14px; color: var(--text-tertiary); margin-left: 2px; font-weight: 500; }
+    .metric-label {
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .metric-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+    .metric-bar {
+      margin-top: 8px;
+      height: 4px; border-radius: 2px;
+      background: var(--border-light); overflow: hidden;
+    }
+    .metric-bar-fill { height: 100%; transition: width 0.5s; }
+
+    .analytics-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .analytics-section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 18px; font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .analytics-section-sub {
+      font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px;
+    }
+
+    /* Activity */
+    .activity-meta {
+      font-size: 12px; color: var(--text-secondary);
+      margin: 8px 0 14px;
+    }
+    .activity-grid {
+      display: grid; grid-template-columns: repeat(14, 1fr);
+      gap: 4px; align-items: end;
+      height: 90px;
+    }
+    .activity-day {
+      display: flex; flex-direction: column; align-items: center;
+      height: 100%; gap: 4px;
+    }
+    .activity-bar-wrap {
+      width: 100%; flex: 1;
+      display: flex; align-items: flex-end;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .activity-bar {
+      width: 100%; min-height: 2px;
+      border-radius: 3px;
+      transition: height 0.4s;
+    }
+    .activity-day-label {
+      font-size: 9px; color: var(--text-tertiary);
+      font-weight: 600;
+    }
+    .activity-day-label.today { color: var(--accent); }
+
+    /* Intervalos */
+    .intervals-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .interval-row {
+      display: grid; grid-template-columns: 64px 1fr 32px;
+      align-items: center; gap: 10px;
+      font-size: 13px;
+    }
+    .interval-label { color: var(--text-secondary); font-weight: 600; font-size: 12px; }
+    .interval-bar-wrap {
+      height: 18px; background: var(--border-light);
+      border-radius: 9px; overflow: hidden;
+    }
+    .interval-bar { height: 100%; border-radius: 9px; transition: width 0.5s; min-width: 2px; }
+    .interval-n { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+    /* Fugas */
+    .leech-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .leech-item {
+      padding: 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--danger);
+      background: var(--danger-soft);
+    }
+    .leech-deck { font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; }
+    .leech-front {
+      font-size: 14px; line-height: 1.4; color: var(--text);
+      margin-bottom: 8px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .leech-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+    .leech-chip {
+      font-size: 11px; padding: 3px 8px; border-radius: 999px;
+      background: var(--bg-elevated); color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .leech-chip-bad { background: var(--danger); color: #fff; }
+
+    /* Por mazo */
+    .deck-stats-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .deck-stat-row {
+      padding: 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .deck-stat-row:active { background: var(--border-light); }
+    .deck-stat-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .deck-stat-name { font-weight: 600; font-size: 14px; }
+    .deck-stat-count { font-size: 12px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+    .deck-stat-bar {
+      display: flex; height: 6px; border-radius: 3px;
+      background: var(--border-light); overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .deck-stat-bar-mastered { background: var(--success); transition: width 0.5s; }
+    .deck-stat-bar-learning { background: var(--warning); transition: width 0.5s; }
+    .deck-stat-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary); }
+
+    @media (min-width: 600px) {
+      .metric-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* ── Bottom Nav (Liquid Glass) ── */
+    .bottom-nav {
+      position: fixed;
+      left: max(16px, env(safe-area-inset-left, 16px));
+      right: max(16px, env(safe-area-inset-right, 16px));
+      bottom: max(12px, env(safe-area-inset-bottom, 12px));
+      z-index: 100;
+      display: flex;
+      gap: 4px;
+      padding: 6px;
+      max-width: 440px;
+      margin: 0 auto;
+      background: rgba(255, 253, 247, 0.62);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      backdrop-filter: blur(28px) saturate(190%);
+      border-radius: 999px;
+      border: 0.5px solid rgba(255,255,255,0.55);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.85),
+        inset 0 -0.5px 0 rgba(0,0,0,0.04),
+        0 1px 2px rgba(42,37,32,0.04),
+        0 12px 36px rgba(42,37,32,0.16);
+    }
+    [data-theme="dark"] .bottom-nav {
+      background: rgba(30, 28, 24, 0.55);
+      border: 0.5px solid rgba(255,255,255,0.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -0.5px 0 rgba(0,0,0,0.4),
+        0 1px 2px rgba(0,0,0,0.3),
+        0 16px 40px rgba(0,0,0,0.55);
+    }
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+      .bottom-nav { background: var(--bg-surface); }
+    }
+    .bottom-nav-item {
+      flex: 1; min-height: 52px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; padding: 6px 8px;
+      border-radius: 999px;
+      background: transparent;
+      border: 0; cursor: pointer;
+      color: var(--text-secondary);
+      transition: transform 0.18s ease, background 0.22s ease, color 0.22s ease;
+      font-family: inherit;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.2px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bottom-nav-item .nav-icon {
+      width: 22px; height: 22px;
+      stroke-width: 1.8;
+    }
+    .bottom-nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .bottom-nav-item.active .nav-icon { stroke-width: 2.2; }
+    .bottom-nav-item:active { transform: scale(0.94); }
+    .bottom-nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+
+    @media (min-width: 720px) {
+      .bottom-nav { display: none; }
+      .has-bottom-nav { padding-bottom: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bottom-nav-item { transition: none; }
+      .bottom-nav-item:active { transform: none; }
+    }
   </style>
 </head>
 <body>
@@ -1276,14 +1500,17 @@ function render() {
     return;
   }
 
+  const showBottomNav = shouldShowBottomNav();
   html += renderHeader();
-  html += '<main class="container">';
+  html += `<main class="container${showBottomNav ? ' has-bottom-nav' : ''}">`;
   switch (state.view) {
     case 'dashboard': html += renderDashboard(); break;
     case 'deck': html += renderDeckDetail(); break;
     case 'results': html += renderResults(); break;
+    case 'analytics': html += renderAnalytics(); break;
   }
   html += '</main>';
+  if (showBottomNav) html += renderBottomNav();
   if (state.modal) html += renderModal();
   if (shouldShowInstallBanner()) html += renderInstallBanner();
   app.innerHTML = html;
@@ -1342,6 +1569,29 @@ function renderAuth() {
     </div>`;
 }
 
+function shouldShowBottomNav() {
+  if (!state.user) return false;
+  return ['dashboard', 'deck', 'results', 'analytics'].includes(state.view);
+}
+
+function renderBottomNav() {
+  const decksActive = ['dashboard', 'deck', 'results'].includes(state.view);
+  const statsActive = state.view === 'analytics';
+  const ICON_LIBRARY = `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l-9 4 9 4 9-4-9-4z"/><path d="M3 13l9 4 9-4"/><path d="M3 18l9 4 9-4"/></svg>`;
+  const ICON_CHART = `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="20" x2="21" y2="20"/><line x1="6" y1="20" x2="6" y2="13"/><line x1="11" y1="20" x2="11" y2="6"/><line x1="16" y1="20" x2="16" y2="15"/></svg>`;
+  return `
+    <nav class="bottom-nav" role="navigation" aria-label="Navegación principal">
+      <button class="bottom-nav-item ${decksActive ? 'active' : ''}" data-action="home" aria-label="Mazos" aria-current="${decksActive ? 'page' : 'false'}">
+        ${ICON_LIBRARY}
+        <span>Mazos</span>
+      </button>
+      <button class="bottom-nav-item ${statsActive ? 'active' : ''}" data-action="openStats" aria-label="Estadísticas" aria-current="${statsActive ? 'page' : 'false'}">
+        ${ICON_CHART}
+        <span>Estudio</span>
+      </button>
+    </nav>`;
+}
+
 function renderHeader() {
   return `
     <header class="header">
@@ -1351,6 +1601,7 @@ function renderHeader() {
         </div>
         <div class="header-actions">
           ${state.user ? `<span class="user-badge">${esc(state.user.username)}</span>` : ''}
+          ${state.user ? `<button class="btn-icon" data-action="openStats" aria-label="Estadísticas" style="font-size:16px">📊</button>` : ''}
           <button class="theme-toggle" data-action="toggleDark" aria-label="Cambiar tema">
             ${state.darkMode ? '☀️' : '🌙'}
           </button>
@@ -1634,6 +1885,176 @@ function renderResults() {
     </div>`;
 }
 
+async function openStats() {
+  state.view = 'analytics';
+  state.stats = null;
+  state.statsLoading = true;
+  render();
+  try {
+    state.stats = await api('GET', '/stats');
+  } catch (e) {
+    toast('No se pudieron cargar las estadísticas');
+  }
+  state.statsLoading = false;
+  render();
+}
+
+function renderAnalytics() {
+  if (state.statsLoading || !state.stats) {
+    return `<div style="padding:48px 20px;text-align:center;color:var(--text-tertiary)"><div class="ptr-spin"></div><p style="margin-top:12px">Calculando estadísticas…</p></div>`;
+  }
+  const s = state.stats;
+  const o = s.overall;
+  const accuracy = o.total_reviews > 0 ? Math.round((o.total_correct / o.total_reviews) * 100) : 0;
+  const masteredPct = o.total > 0 ? Math.round((o.mastered / o.total) * 100) : 0;
+  const reviewedPct = o.total > 0 ? Math.round((o.reviewed / o.total) * 100) : 0;
+
+  // Distribución de intervalos
+  const iv = s.intervals;
+  const ivBuckets = [
+    { label: 'Nuevas', n: iv.new_cards, color: 'var(--text-tertiary)' },
+    { label: '<1d', n: iv.d_lt1, color: 'var(--danger)' },
+    { label: '1–7d', n: iv.d_1_7, color: 'var(--warning)' },
+    { label: '7–30d', n: iv.d_7_30, color: 'var(--accent)' },
+    { label: '30–90d', n: iv.d_30_90, color: 'var(--success)' },
+    { label: '90d+', n: iv.d_90p, color: '#3a7d44' },
+  ];
+  const ivMax = Math.max(1, ...ivBuckets.map(b => b.n));
+
+  // Actividad 14 días
+  const actMap = {};
+  s.activity.forEach(a => { actMap[a.day] = a; });
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    days.push({
+      key,
+      label: d.toLocaleDateString('es', { weekday: 'short' }).slice(0, 1).toUpperCase(),
+      day: d.getDate(),
+      ...(actMap[key] || { reviews: 0, correct: 0, lapses: 0 })
+    });
+  }
+  const actMax = Math.max(1, ...days.map(d => d.reviews));
+  const totalReviews14 = days.reduce((s, d) => s + d.reviews, 0);
+  const activeDays = days.filter(d => d.reviews > 0).length;
+
+  return `
+    <div class="analytics-view">
+      <div class="analytics-back">
+        <button class="btn-icon" data-action="home" aria-label="Volver">←</button>
+        <h1 class="analytics-title">Estadísticas</h1>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-value">${o.reviewed}<span class="metric-of">/${o.total}</span></div>
+          <div class="metric-label">Tarjetas tocadas</div>
+          <div class="metric-bar"><div class="metric-bar-fill" style="width:${reviewedPct}%;background:var(--accent)"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${accuracy}<span class="metric-of">%</span></div>
+          <div class="metric-label">Acierto global</div>
+          <div class="metric-sub">${o.total_correct} de ${o.total_reviews} reviews</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color:var(--success)">${o.mastered}</div>
+          <div class="metric-label">Dominadas</div>
+          <div class="metric-sub">${masteredPct}% del total</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color:var(--danger)">${o.leeches}</div>
+          <div class="metric-label">Fugas 🪤</div>
+          <div class="metric-sub">${o.due} pendientes hoy</div>
+        </div>
+      </div>
+
+      <div class="analytics-section">
+        <h2 class="analytics-section-title">Actividad · últimos 14 días</h2>
+        <div class="activity-meta">${totalReviews14} reviews · ${activeDays}/14 días activos</div>
+        <div class="activity-grid">
+          ${days.map(d => {
+            const h = (d.reviews / actMax) * 100;
+            const isToday = d.key === new Date().toISOString().slice(0,10);
+            return `
+              <div class="activity-day" title="${d.key}: ${d.reviews} reviews (${d.correct} ok, ${d.lapses} lap)">
+                <div class="activity-bar-wrap">
+                  <div class="activity-bar" style="height:${h}%;background:${d.lapses > d.correct ? 'var(--danger)' : 'var(--success)'}"></div>
+                </div>
+                <div class="activity-day-label${isToday ? ' today' : ''}">${d.day}</div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="analytics-section">
+        <h2 class="analytics-section-title">Distribución por intervalo</h2>
+        <div class="intervals-grid">
+          ${ivBuckets.map(b => `
+            <div class="interval-row">
+              <div class="interval-label">${b.label}</div>
+              <div class="interval-bar-wrap">
+                <div class="interval-bar" style="width:${(b.n/ivMax)*100}%;background:${b.color}"></div>
+              </div>
+              <div class="interval-n">${b.n}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      ${s.leeches.length > 0 ? `
+      <div class="analytics-section">
+        <h2 class="analytics-section-title">Fugas 🪤 · top ${s.leeches.length}</h2>
+        <p class="analytics-section-sub">Tarjetas con 4+ lapsos. Aquí concentra repaso.</p>
+        <div class="leech-list">
+          ${s.leeches.map(l => {
+            const acc = l.review_count > 0 ? Math.round((l.correct_count / l.review_count) * 100) : 0;
+            return `
+              <div class="leech-item">
+                <div class="leech-deck">${l.deck_emoji} ${esc(l.deck_name)}</div>
+                <div class="leech-front math-target">${mdInline(l.front)}</div>
+                <div class="leech-stats">
+                  <span class="leech-chip leech-chip-bad">${l.lapse_count} lapsos</span>
+                  <span class="leech-chip">${acc}% acierto</span>
+                  <span class="leech-chip">${l.review_count} reviews</span>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
+
+      <div class="analytics-section">
+        <h2 class="analytics-section-title">Por mazo</h2>
+        <div class="deck-stats-list">
+          ${s.perDeck.map(d => {
+            const dAcc = d.total_reviews > 0 ? Math.round((d.total_correct / d.total_reviews) * 100) : 0;
+            const dMastPct = d.total > 0 ? (d.mastered / d.total) * 100 : 0;
+            const dRevPct = d.total > 0 ? (d.reviewed / d.total) * 100 : 0;
+            return `
+              <div class="deck-stat-row" data-action="openDeck" data-id="${d.id}">
+                <div class="deck-stat-head">
+                  <span class="deck-stat-name">${d.emoji} ${esc(d.name)}</span>
+                  <span class="deck-stat-count">${d.reviewed}/${d.total}</span>
+                </div>
+                <div class="deck-stat-bar">
+                  <div class="deck-stat-bar-mastered" style="width:${dMastPct}%"></div>
+                  <div class="deck-stat-bar-learning" style="width:${dRevPct - dMastPct}%"></div>
+                </div>
+                <div class="deck-stat-meta">
+                  <span>${dAcc}% acierto</span>
+                  ${d.due > 0 ? `<span style="color:var(--accent)">${d.due} pendientes</span>` : ''}
+                  ${d.leeches > 0 ? `<span style="color:var(--danger)">${d.leeches} fugas</span>` : ''}
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div style="height:32px"></div>
+    </div>`;
+}
+
 function renderModal() {
   const m = state.modal;
   let content = '';
@@ -1864,6 +2285,7 @@ document.getElementById('app').addEventListener('click', async (e) => {
   switch (action) {
     case 'home': goHome(); break;
     case 'toggleDark': toggleDark(); break;
+    case 'openStats': await openStats(); break;
     case 'openDeck': await openDeck(id); break;
     case 'startStudy': await startStudy(id); break;
     case 'flip': flipCard(); break;

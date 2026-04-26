@@ -28,6 +28,17 @@ const pool = new Pool({
 const MIGRATIONS = [
   `ALTER TABLE cards ADD COLUMN IF NOT EXISTS lapse_count INT DEFAULT 0`,
   `ALTER TABLE cards ADD COLUMN IF NOT EXISTS last_reviewed TIMESTAMPTZ`,
+  `CREATE TABLE IF NOT EXISTS card_reviews (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    card_id UUID REFERENCES cards(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    rating INT NOT NULL,
+    prev_interval NUMERIC,
+    new_interval NUMERIC,
+    reviewed_at TIMESTAMPTZ DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_card_reviews_card ON card_reviews(card_id, reviewed_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_card_reviews_user_date ON card_reviews(user_id, reviewed_at DESC)`,
 ];
 
 async function main() {
