@@ -457,7 +457,11 @@
     .study-counter {
       font-size: 13px; font-weight: 600; color: var(--text-secondary);
       margin-bottom: 6px;
+      display: flex; justify-content: space-between; gap: 12px;
     }
+    .study-clock { font-variant-numeric: tabular-nums; }
+    .study-clock.warn { color: var(--danger); animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .study-bar {
       height: 5px; border-radius: 3px;
       background: var(--border-light); overflow: hidden;
@@ -949,6 +953,16 @@ function esc(str) {
 function escNl(str) {
   return esc(str).replace(/\\n/g, '\n');
 }
+// Markdown ligero: **bold**, *italic*, saltos de línea. Compatible con KaTeX (no toca $...$)
+function mdInline(str) {
+  if (!str) return '';
+  let s = esc(str);
+  s = s.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+  // italic con * solitario (no doble), sin cruzar líneas
+  s = s.replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>');
+  s = s.replace(/\n/g, '<br>');
+  return s;
+}
 function cardFontSize(text) {
   const len = (text || '').length;
   if (len < 40) return 'clamp(20px, 5vw, 26px)';
@@ -1084,18 +1098,49 @@ async function openDeck(id) {
   window.scrollTo(0, 0);
 }
 
+const SESSION_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutos
+const SESSION_BATCH_SIZE = 15;
+let studyTickInterval = null;
+
+function stopStudyTick() {
+  if (studyTickInterval) { clearInterval(studyTickInterval); studyTickInterval = null; }
+}
+function startStudyTick() {
+  stopStudyTick();
+  studyTickInterval = setInterval(() => {
+    if (state.view !== 'study') { stopStudyTick(); return; }
+    const elapsed = Date.now() - (state.studySessionStart || Date.now());
+    const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);
+    const el = document.getElementById('study-clock');
+    if (el) {
+      el.textContent = '⏱ ' + fmtClock(remaining);
+      if (remaining <= 2 * 60 * 1000) el.classList.add('warn');
+    }
+    if (remaining === 0 && !state.flipped) {
+      stopStudyTick();
+      state.studyEndReason = 'timeout';
+      state.view = 'results';
+      render();
+    }
+  }, 1000);
+}
+
 async function startStudy(deckId) {
   const cards = await api('GET', `/decks/${deckId}/study`);
   if (cards.length === 0) {
     toast('No hay tarjetas pendientes');
     return;
   }
-  state.studyCards = cards;
+  state.studyCards = cards.slice(0, SESSION_BATCH_SIZE);
+  state.studyBatchSize = state.studyCards.length;
   state.studyIndex = 0;
   state.flipped = false;
   state.results = [];
+  state.studySessionStart = Date.now();
+  state.studyEndReason = null;
   state.view = 'study';
   render();
+  startStudyTick();
 }
 
 async function rateCard(rating) {
@@ -1103,11 +1148,20 @@ async function rateCard(rating) {
   const card = state.studyCards[state.studyIndex];
   await api('POST', `/cards/${card.id}/review`, { rating });
   state.results.push({ card, rating });
-  // Otra vez: re-encolar al final de la sesión
-  if (rating === 0) state.studyCards.push(card);
+  // Re-encolar si no alcanzó "Bien": Otra vez (0) y Difícil (1) regresan
+  if (rating <= 1) state.studyCards.push(card);
   state.studyIndex++;
   state.flipped = false;
-  if (state.studyIndex >= state.studyCards.length) {
+
+  const elapsed = Date.now() - (state.studySessionStart || Date.now());
+  const allDone = state.studyIndex >= state.studyCards.length;
+  const timeUp = elapsed >= SESSION_TIMEOUT_MS;
+
+  if (timeUp && !allDone) {
+    state.studyEndReason = 'timeout';
+    state.view = 'results';
+  } else if (allDone) {
+    state.studyEndReason = 'completed';
     state.view = 'results';
   }
   render();
@@ -1431,8 +1485,8 @@ function renderDeckDetail() {
       html += `
         <div class="card-item">
           <div class="card-texts">
-            <div class="card-front-preview math-target">${esc(c.front)}</div>
-            <div class="card-back-preview math-target">${esc(c.back)}</div>
+            <div class="card-front-preview math-target">${mdInline(c.front)}</div>
+            <div class="card-back-preview math-target">${mdInline(c.back)}</div>
           </div>
           ${badge}
           <div class="card-item-actions">
@@ -1446,6 +1500,13 @@ function renderDeckDetail() {
   return html;
 }
 
+function fmtClock(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const mm = Math.floor(s / 60).toString().padStart(2, '0');
+  const ss = (s % 60).toString().padStart(2, '0');
+  return `${mm}:${ss}`;
+}
+
 function renderStudy() {
   const total = state.studyCards.length;
   const idx = state.studyIndex;
@@ -1453,13 +1514,19 @@ function renderStudy() {
   const pct = ((idx) / total * 100).toFixed(0);
   const frontSize = cardFontSize(card.front);
   const backSize = cardFontSize(card.back);
+  const elapsed = state.studySessionStart ? Date.now() - state.studySessionStart : 0;
+  const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);
+  const timeWarn = remaining <= 2 * 60 * 1000;
 
   return `
     <div class="study-view">
       <div class="study-topbar">
         <button class="study-close" data-action="exitStudy">✕</button>
         <div class="study-info">
-          <div class="study-counter">${idx + 1} de ${total}</div>
+          <div class="study-counter">
+            <span>${idx + 1} de ${total}</span>
+            <span class="study-clock${timeWarn ? ' warn' : ''}" id="study-clock">⏱ ${fmtClock(remaining)}</span>
+          </div>
           <div class="study-bar">
             <div class="study-bar-fill" style="width:${pct}%"></div>
           </div>
@@ -1474,13 +1541,13 @@ function renderStudy() {
         <div class="flashcard ${state.flipped ? 'flipped' : ''}" id="flashcard">
           <div class="flashcard-inner">
             <div class="flashcard-face flashcard-front">
-              <div class="flashcard-text math-target" style="font-size:${frontSize}">${escNl(card.front)}</div>
+              <div class="flashcard-text math-target" style="font-size:${frontSize}">${mdInline(card.front)}</div>
               <div class="flashcard-hint">
                 <span class="hint-tap">↻</span> Toca para voltear
               </div>
             </div>
             <div class="flashcard-face flashcard-back">
-              <div class="flashcard-text math-target" style="font-size:${backSize}">${escNl(card.back)}</div>
+              <div class="flashcard-text math-target" style="font-size:${backSize}">${mdInline(card.back)}</div>
             </div>
           </div>
         </div>
@@ -1525,19 +1592,23 @@ function renderResults() {
   const easy = state.results.filter(r => r.rating === 3).length;
   const correct = hard + good + easy;
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
-  const messages = [
-    '¡Excelente sesión!',
-    '¡Buen trabajo!',
-    '¡Tu memoria mejora!',
-    '¡Increíble esfuerzo!'
-  ];
+  const duration = state.studySessionStart ? Date.now() - state.studySessionStart : 0;
+  const pendientes = again + hard;
+  const reason = state.studyEndReason;
+  const messages = reason === 'timeout'
+    ? ['¡Tiempo cumplido!', '¡20 minutos completados!']
+    : ['¡Excelente sesión!', '¡Buen trabajo!', '¡Tu memoria mejora!', '¡Increíble esfuerzo!'];
   const msg = messages[Math.floor(Math.random() * messages.length)];
+  const sub = reason === 'timeout'
+    ? `Tiempo agotado · ${total} tarjetas · ${accuracy}% acierto`
+    : `Repasaste ${total} tarjeta${total !== 1 ? 's' : ''} en ${fmtClock(duration)} · ${accuracy}% acierto`;
 
   return `
     <div class="results">
-      <span class="results-emoji">🎉</span>
+      <span class="results-emoji">${reason === 'timeout' ? '⏱' : '🎉'}</span>
       <h1 class="results-title">${msg}</h1>
-      <p class="results-subtitle">Repasaste ${total} tarjeta${total !== 1 ? 's' : ''} · ${accuracy}% acierto</p>
+      <p class="results-subtitle">${sub}</p>
+      ${pendientes > 0 ? `<p class="results-subtitle" style="margin-top:4px;color:var(--warning)">${pendientes} pendiente${pendientes !== 1 ? 's' : ''} para próxima sesión</p>` : ''}
       <div class="results-stats" style="grid-template-columns:repeat(4,1fr)">
         <div>
           <div class="results-stat-value" style="color:var(--danger)">${again}</div>

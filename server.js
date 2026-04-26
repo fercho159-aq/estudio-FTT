@@ -201,7 +201,7 @@ app.get('/api/decks/:id/study', auth, h(async (req, res) => {
   if (!deck.rows[0]) return res.status(404).json({ error: 'Mazo no encontrado' });
 
   const { rows } = await pool.query(
-    'SELECT * FROM cards WHERE deck_id = $1 AND next_review <= NOW() ORDER BY next_review LIMIT 50',
+    'SELECT * FROM cards WHERE deck_id = $1 AND next_review <= NOW() ORDER BY next_review LIMIT 15',
     [req.params.id]
   );
   for (let i = rows.length - 1; i > 0; i--) {
