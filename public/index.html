@@ -129,16 +129,24 @@
       user-select: none;
     }
     .logo span { font-size: 18px; }
-    .header-actions { display: flex; align-items: center; gap: 6px; }
+    .header-actions { display: flex; align-items: center; gap: 4px; }
 
     .theme-toggle {
-      width: 42px; height: 42px;
+      width: 40px; height: 40px;
       display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; border: 1px solid var(--border);
-      background: var(--bg); cursor: pointer;
-      transition: all 0.2s; font-size: 17px;
+      border-radius: var(--radius-xs);
+      border: 0;
+      background: transparent;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, transform 0.15s;
+      font-size: 17px;
     }
-    .theme-toggle:active { transform: scale(0.92); }
+    .theme-toggle:active {
+      transform: scale(0.92);
+      background: var(--border-light);
+      color: var(--text);
+    }
 
     /* ── Buttons ── */
     .btn {
@@ -917,22 +925,42 @@
     .analytics-view { padding: 0 0 24px; }
     .analytics-back {
       display: flex; align-items: center; gap: 12px;
-      padding: 8px 0 16px;
+      padding: 24px 0 4px;
     }
     .analytics-title {
-      font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600;
-      letter-spacing: -0.5px;
+      font-family: 'Fraunces', serif;
+      font-size: 28px; font-weight: 600;
+      font-style: italic;
+      color: var(--accent);
+      letter-spacing: -0.5px; line-height: 1.2;
+    }
+    .analytics-subtitle {
+      color: var(--text-secondary); font-size: 14px;
+      padding: 0 0 20px;
     }
     .metric-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      margin-bottom: 24px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-bottom: 16px;
     }
     .metric-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px;
+      padding: 16px;
+      display: flex; flex-direction: column;
+      min-height: 120px;
     }
+    .metric-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-xs);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+      background: var(--accent-soft);
+    }
+    .metric-icon.success { background: var(--success-soft); }
+    .metric-icon.warning { background: var(--warning-soft); }
+    .metric-icon.danger { background: var(--danger-soft); }
     .metric-value {
       font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600;
       line-height: 1; letter-spacing: -1px;
@@ -945,10 +973,11 @@
     }
     .metric-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
     .metric-bar {
-      margin-top: 8px;
+      margin-top: auto; padding-top: 8px;
       height: 4px; border-radius: 2px;
       background: var(--border-light); overflow: hidden;
     }
+    .metric-card .metric-bar { height: 4px; }
     .metric-bar-fill { height: 100%; transition: width 0.5s; }
 
     .analytics-section {
@@ -1063,37 +1092,27 @@
       .metric-grid { grid-template-columns: repeat(4, 1fr); }
     }
 
-    /* ── Bottom Nav (Liquid Glass) ── */
+    /* ── Bottom Nav (Glass, mismo lenguaje visual) ── */
     .bottom-nav {
       position: fixed;
       left: max(16px, env(safe-area-inset-left, 16px));
       right: max(16px, env(safe-area-inset-right, 16px));
-      bottom: max(12px, env(safe-area-inset-bottom, 12px));
+      bottom: max(14px, env(safe-area-inset-bottom, 14px));
       z-index: 100;
       display: flex;
-      gap: 4px;
       padding: 6px;
-      max-width: 440px;
+      max-width: 420px;
       margin: 0 auto;
-      background: rgba(255, 253, 247, 0.62);
-      -webkit-backdrop-filter: blur(28px) saturate(190%);
-      backdrop-filter: blur(28px) saturate(190%);
-      border-radius: 999px;
-      border: 0.5px solid rgba(255,255,255,0.55);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.85),
-        inset 0 -0.5px 0 rgba(0,0,0,0.04),
-        0 1px 2px rgba(42,37,32,0.04),
-        0 12px 36px rgba(42,37,32,0.16);
+      background: rgba(255, 253, 247, 0.78);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
     }
     [data-theme="dark"] .bottom-nav {
-      background: rgba(30, 28, 24, 0.55);
-      border: 0.5px solid rgba(255,255,255,0.08);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        inset 0 -0.5px 0 rgba(0,0,0,0.4),
-        0 1px 2px rgba(0,0,0,0.3),
-        0 16px 40px rgba(0,0,0,0.55);
+      background: rgba(30, 28, 24, 0.72);
+      border-color: var(--border);
     }
     @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
       .bottom-nav { background: var(--bg-surface); }
@@ -1102,31 +1121,33 @@
       flex: 1; min-height: 52px;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 3px; padding: 6px 8px;
-      border-radius: 999px;
+      gap: 3px; padding: 8px 4px;
+      border-radius: var(--radius-sm);
       background: transparent;
       border: 0; cursor: pointer;
-      color: var(--text-secondary);
-      transition: transform 0.18s ease, background 0.22s ease, color 0.22s ease;
-      font-family: inherit;
+      color: var(--text-tertiary);
+      transition: color 0.18s ease, transform 0.18s ease;
+      font-family: 'Work Sans', sans-serif;
       font-size: 10px; font-weight: 600;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.3px; text-transform: uppercase;
       -webkit-tap-highlight-color: transparent;
     }
     .bottom-nav-item .nav-icon {
       width: 22px; height: 22px;
       stroke-width: 1.8;
+      transition: stroke-width 0.18s ease;
     }
-    .bottom-nav-item.active {
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-    .bottom-nav-item.active .nav-icon { stroke-width: 2.2; }
+    .bottom-nav-item.active { color: var(--accent); }
+    .bottom-nav-item.active .nav-icon { stroke-width: 2.4; }
     .bottom-nav-item:active { transform: scale(0.94); }
     .bottom-nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .has-bottom-nav { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+    body[data-bottom-nav="1"] .install-banner { bottom: calc(86px + env(safe-area-inset-bottom, 12px)); }
 
+    @media (max-width: 719px) {
+      .header-stats-btn { display: none; }
+    }
     @media (min-width: 720px) {
       .bottom-nav { display: none; }
       .has-bottom-nav { padding-bottom: 0; }
@@ -1513,6 +1534,7 @@ function render() {
   if (showBottomNav) html += renderBottomNav();
   if (state.modal) html += renderModal();
   if (shouldShowInstallBanner()) html += renderInstallBanner();
+  document.body.dataset.bottomNav = showBottomNav ? '1' : '0';
   app.innerHTML = html;
   renderAllMath();
 
@@ -1601,7 +1623,7 @@ function renderHeader() {
         </div>
         <div class="header-actions">
           ${state.user ? `<span class="user-badge">${esc(state.user.username)}</span>` : ''}
-          ${state.user ? `<button class="btn-icon" data-action="openStats" aria-label="Estadísticas" style="font-size:16px">📊</button>` : ''}
+          ${state.user ? `<button class="btn-icon header-stats-btn" data-action="openStats" aria-label="Estadísticas" style="font-size:16px">📊</button>` : ''}
           <button class="theme-toggle" data-action="toggleDark" aria-label="Cambiar tema">
             ${state.darkMode ? '☀️' : '🌙'}
           </button>
@@ -1942,10 +1964,8 @@ function renderAnalytics() {
 
   return `
     <div class="analytics-view">
-      <div class="analytics-back">
-        <button class="btn-icon" data-action="home" aria-label="Volver">←</button>
-        <h1 class="analytics-title">Estadísticas</h1>
-      </div>
+      <h1 class="analytics-title">Tu estudio</h1>
+      <p class="analytics-subtitle">Cómo va tu memoria — datos al instante</p>
 
       <div class="metric-grid">
         <div class="metric-card">
