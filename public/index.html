@@ -18,6 +18,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -384,6 +387,7 @@
     .badge-new { background: var(--accent-soft); color: var(--accent); }
     .badge-learning { background: var(--warning-soft); color: var(--warning); }
     .badge-mastered { background: var(--success-soft); color: var(--success); }
+    .badge-leech { background: var(--danger-soft); color: var(--danger); }
     .card-item-actions { display: flex; gap: 0; flex-shrink: 0; }
 
     .back-link {
@@ -426,7 +430,8 @@
     }
     .swipe-hint.left { left: 24px; background: var(--danger); color: #fff; transform: translateY(-50%) rotate(-8deg); }
     .swipe-hint.right { right: 24px; background: var(--success); color: #fff; transform: translateY(-50%) rotate(8deg); }
-    .swipe-hint.top { left: 50%; top: 14%; transform: translateX(-50%); background: var(--warning); color: #fff; }
+    .swipe-hint.top { left: 50%; top: 14%; transform: translateX(-50%); background: var(--accent); color: #fff; }
+    .swipe-hint.bottom { left: 50%; bottom: 14%; top: auto; transform: translateX(-50%); background: var(--warning); color: #fff; }
     .swipe-hint.show { opacity: 1; }
     .study-topbar {
       padding: 12px 20px;
@@ -545,12 +550,12 @@
       padding: 14px 0;
     }
     .rating-buttons {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
       animation: fadeUp 0.25s ease;
     }
     .rating-btn {
-      padding: 14px 8px;
+      padding: 10px 4px;
       border-radius: var(--radius-sm); border: 2px solid;
       cursor: pointer; text-align: center;
       font-family: 'Work Sans', sans-serif;
@@ -561,18 +566,22 @@
     }
     .rating-btn:active { transform: scale(0.94); }
     .rating-icon { font-size: 18px; margin-bottom: 2px; }
-    .rating-name { font-weight: 700; font-size: 14px; display: block; }
+    .rating-name { font-weight: 700; font-size: 12px; display: block; }
     .rating-key {
       font-size: 10px; opacity: 0.5; margin-top: 1px; display: block;
     }
-    .rating-hard {
+    .rating-again {
       border-color: var(--danger); background: var(--danger-soft); color: var(--danger);
     }
-    .rating-hard:active { background: var(--danger); color: #fff; }
-    .rating-normal {
+    .rating-again:active { background: var(--danger); color: #fff; }
+    .rating-hard {
       border-color: var(--warning); background: var(--warning-soft); color: var(--warning);
     }
-    .rating-normal:active { background: var(--warning); color: #fff; }
+    .rating-hard:active { background: var(--warning); color: #fff; }
+    .rating-good {
+      border-color: var(--accent); background: var(--accent-soft); color: var(--accent);
+    }
+    .rating-good:active { background: var(--accent); color: #fff; }
     .rating-easy {
       border-color: var(--success); background: var(--success-soft); color: var(--success);
     }
@@ -962,6 +971,27 @@ function isStandalone() {
 function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
+function renderMath(root) {
+  if (!root || !window.renderMathInElement) return;
+  const targets = root.matches?.('.math-target') ? [root] : root.querySelectorAll?.('.math-target') || [];
+  targets.forEach(el => {
+    try {
+      window.renderMathInElement(el, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '\\[', right: '\\]', display: true },
+          { left: '$', right: '$', display: false },
+          { left: '\\(', right: '\\)', display: false }
+        ],
+        throwOnError: false,
+        ignoredTags: ['script','noscript','style','textarea','pre','code']
+      });
+    } catch (e) { /* swallow */ }
+  });
+}
+function renderAllMath() {
+  if (window.renderMathInElement) renderMath(document.getElementById('app'));
+}
 
 // ── API ──
 async function api(method, path, body) {
@@ -1073,6 +1103,8 @@ async function rateCard(rating) {
   const card = state.studyCards[state.studyIndex];
   await api('POST', `/cards/${card.id}/review`, { rating });
   state.results.push({ card, rating });
+  // Otra vez: re-encolar al final de la sesión
+  if (rating === 0) state.studyCards.push(card);
   state.studyIndex++;
   state.flipped = false;
   if (state.studyIndex >= state.studyCards.length) {
@@ -1185,6 +1217,7 @@ function render() {
   if (state.view === 'study') {
     html += renderStudy();
     app.innerHTML = html;
+    renderAllMath();
     setupStudyGestures();
     return;
   }
@@ -1200,6 +1233,7 @@ function render() {
   if (state.modal) html += renderModal();
   if (shouldShowInstallBanner()) html += renderInstallBanner();
   app.innerHTML = html;
+  renderAllMath();
 
   if (state.view === 'dashboard') setupPullToRefresh();
 }
@@ -1388,14 +1422,17 @@ function renderDeckDetail() {
   } else {
     state.cards.forEach(c => {
       let badge = '';
+      const accuracy = c.review_count > 0 ? c.correct_count / c.review_count : 0;
+      const isMastered = c.interval_days >= 30 && c.review_count >= 5 && accuracy >= 0.85;
       if (c.review_count === 0) badge = '<span class="card-badge badge-new">Nueva</span>';
-      else if (c.interval_days >= 21) badge = '<span class="card-badge badge-mastered">Dominada</span>';
+      else if ((c.lapse_count || 0) >= 4) badge = '<span class="card-badge badge-leech">🪤 Fuga</span>';
+      else if (isMastered) badge = '<span class="card-badge badge-mastered">Dominada</span>';
       else badge = '<span class="card-badge badge-learning">Aprendiendo</span>';
       html += `
         <div class="card-item">
           <div class="card-texts">
-            <div class="card-front-preview">${esc(c.front)}</div>
-            <div class="card-back-preview">${esc(c.back)}</div>
+            <div class="card-front-preview math-target">${esc(c.front)}</div>
+            <div class="card-back-preview math-target">${esc(c.back)}</div>
           </div>
           ${badge}
           <div class="card-item-actions">
@@ -1430,19 +1467,20 @@ function renderStudy() {
       </div>
 
       <div class="study-card-area" data-action="flip" id="study-area">
-        <div class="swipe-hint left" id="hint-left">Difícil</div>
-        <div class="swipe-hint top" id="hint-top">Normal</div>
+        <div class="swipe-hint left" id="hint-left">Otra vez</div>
+        <div class="swipe-hint bottom" id="hint-bottom">Difícil</div>
+        <div class="swipe-hint top" id="hint-top">Bien</div>
         <div class="swipe-hint right" id="hint-right">Fácil</div>
         <div class="flashcard ${state.flipped ? 'flipped' : ''}" id="flashcard">
           <div class="flashcard-inner">
             <div class="flashcard-face flashcard-front">
-              <div class="flashcard-text" style="font-size:${frontSize}">${escNl(card.front)}</div>
+              <div class="flashcard-text math-target" style="font-size:${frontSize}">${escNl(card.front)}</div>
               <div class="flashcard-hint">
                 <span class="hint-tap">↻</span> Toca para voltear
               </div>
             </div>
             <div class="flashcard-face flashcard-back">
-              <div class="flashcard-text" style="font-size:${backSize}">${escNl(card.back)}</div>
+              <div class="flashcard-text math-target" style="font-size:${backSize}">${escNl(card.back)}</div>
             </div>
           </div>
         </div>
@@ -1451,14 +1489,19 @@ function renderStudy() {
       <div class="study-bottombar">
         ${state.flipped ? `
           <div class="rating-buttons">
+            <button class="rating-btn rating-again" data-action="rate" data-rating="0">
+              <span class="rating-icon">🔁</span>
+              <span class="rating-name">Otra vez</span>
+              <span class="rating-key">0</span>
+            </button>
             <button class="rating-btn rating-hard" data-action="rate" data-rating="1">
               <span class="rating-icon">😓</span>
               <span class="rating-name">Difícil</span>
               <span class="rating-key">1</span>
             </button>
-            <button class="rating-btn rating-normal" data-action="rate" data-rating="2">
-              <span class="rating-icon">🤔</span>
-              <span class="rating-name">Normal</span>
+            <button class="rating-btn rating-good" data-action="rate" data-rating="2">
+              <span class="rating-icon">🙂</span>
+              <span class="rating-name">Bien</span>
               <span class="rating-key">2</span>
             </button>
             <button class="rating-btn rating-easy" data-action="rate" data-rating="3">
@@ -1468,7 +1511,7 @@ function renderStudy() {
             </button>
           </div>
         ` : `
-          <div class="study-hint-bottom">Toca para voltear · desliza ← → ↑ tras voltear</div>
+          <div class="study-hint-bottom">Toca para voltear · desliza ← ↓ ↑ → tras voltear</div>
         `}
       </div>
     </div>`;
@@ -1476,9 +1519,12 @@ function renderStudy() {
 
 function renderResults() {
   const total = state.results.length;
+  const again = state.results.filter(r => r.rating === 0).length;
   const hard = state.results.filter(r => r.rating === 1).length;
-  const normal = state.results.filter(r => r.rating === 2).length;
+  const good = state.results.filter(r => r.rating === 2).length;
   const easy = state.results.filter(r => r.rating === 3).length;
+  const correct = hard + good + easy;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
   const messages = [
     '¡Excelente sesión!',
     '¡Buen trabajo!',
@@ -1491,15 +1537,19 @@ function renderResults() {
     <div class="results">
       <span class="results-emoji">🎉</span>
       <h1 class="results-title">${msg}</h1>
-      <p class="results-subtitle">Repasaste ${total} tarjeta${total !== 1 ? 's' : ''}</p>
-      <div class="results-stats">
+      <p class="results-subtitle">Repasaste ${total} tarjeta${total !== 1 ? 's' : ''} · ${accuracy}% acierto</p>
+      <div class="results-stats" style="grid-template-columns:repeat(4,1fr)">
         <div>
-          <div class="results-stat-value" style="color:var(--danger)">${hard}</div>
+          <div class="results-stat-value" style="color:var(--danger)">${again}</div>
+          <div class="results-stat-label">Otra vez</div>
+        </div>
+        <div>
+          <div class="results-stat-value" style="color:var(--warning)">${hard}</div>
           <div class="results-stat-label">Difícil</div>
         </div>
         <div>
-          <div class="results-stat-value" style="color:var(--warning)">${normal}</div>
-          <div class="results-stat-label">Normal</div>
+          <div class="results-stat-value" style="color:var(--accent)">${good}</div>
+          <div class="results-stat-label">Bien</div>
         </div>
         <div>
           <div class="results-stat-value" style="color:var(--success)">${easy}</div>
@@ -1580,6 +1630,7 @@ function setupStudyGestures() {
   const hintL = document.getElementById('hint-left');
   const hintR = document.getElementById('hint-right');
   const hintT = document.getElementById('hint-top');
+  const hintB = document.getElementById('hint-bottom');
 
   let startX = 0, startY = 0, dx = 0, dy = 0, dragging = false, startedFromTap = false;
   const THRESH = 90;
@@ -1602,22 +1653,29 @@ function setupStudyGestures() {
       card.style.transform = `translate(${dx * 0.4}px, ${dy * 0.2}px) rotate(${dx * 0.02}deg)`;
       return;
     }
-    card.style.transform = `translate(${dx}px, ${dy < 0 ? dy * 0.6 : dy * 0.3}px) rotate(${dx * 0.06}deg)`;
+    card.style.transform = `translate(${dx}px, ${dy * 0.5}px) rotate(${dx * 0.06}deg)`;
     const rightOn = dx > 40 && Math.abs(dx) > Math.abs(dy);
     const leftOn = dx < -40 && Math.abs(dx) > Math.abs(dy);
     const topOn = dy < -50 && Math.abs(dy) > Math.abs(dx);
+    const bottomOn = dy > 50 && Math.abs(dy) > Math.abs(dx);
     hintR && hintR.classList.toggle('show', rightOn);
     hintL && hintL.classList.toggle('show', leftOn);
     hintT && hintT.classList.toggle('show', topOn);
+    hintB && hintB.classList.toggle('show', bottomOn);
   }, { passive: true });
+
+  const clearHints = () => {
+    hintL && hintL.classList.remove('show');
+    hintR && hintR.classList.remove('show');
+    hintT && hintT.classList.remove('show');
+    hintB && hintB.classList.remove('show');
+  };
 
   area.addEventListener('touchend', () => {
     if (!dragging) return;
     dragging = false;
     card.classList.remove('swiping');
-    hintL && hintL.classList.remove('show');
-    hintR && hintR.classList.remove('show');
-    hintT && hintT.classList.remove('show');
+    clearHints();
 
     if (startedFromTap && Math.abs(dx) < 10 && Math.abs(dy) < 10) {
       card.style.transform = '';
@@ -1631,15 +1689,18 @@ function setupStudyGestures() {
       card.style.transform = `translate(${direction * window.innerWidth}px, 0) rotate(${direction * 20}deg)`;
       card.style.opacity = '0';
       haptic(12);
-      setTimeout(() => rateCard(direction > 0 ? 3 : 1), 180);
+      // izq → Otra vez (0), der → Fácil (3)
+      setTimeout(() => rateCard(direction > 0 ? 3 : 0), 180);
       return;
     }
-    if (state.flipped && dy < -THRESH && Math.abs(dy) > Math.abs(dx)) {
+    if (state.flipped && Math.abs(dy) > THRESH && Math.abs(dy) > Math.abs(dx)) {
+      const direction = dy < 0 ? -1 : 1;
       card.style.transition = 'transform 0.25s ease-out, opacity 0.25s';
-      card.style.transform = `translate(0, ${-window.innerHeight}px)`;
+      card.style.transform = `translate(0, ${direction * window.innerHeight}px)`;
       card.style.opacity = '0';
       haptic(12);
-      setTimeout(() => rateCard(2), 180);
+      // arriba → Bien (2), abajo → Difícil (1)
+      setTimeout(() => rateCard(direction < 0 ? 2 : 1), 180);
       return;
     }
     card.style.transform = '';
@@ -1649,9 +1710,7 @@ function setupStudyGestures() {
     dragging = false;
     card.classList.remove('swiping');
     card.style.transform = '';
-    hintL && hintL.classList.remove('show');
-    hintR && hintR.classList.remove('show');
-    hintT && hintT.classList.remove('show');
+    clearHints();
   });
 }
 
@@ -1848,6 +1907,7 @@ document.addEventListener('keydown', (e) => {
   if (state.view === 'study') {
     if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); flipCard(); }
     if (state.flipped) {
+      if (e.key === '0') rateCard(0);
       if (e.key === '1') rateCard(1);
       if (e.key === '2') rateCard(2);
       if (e.key === '3') rateCard(3);

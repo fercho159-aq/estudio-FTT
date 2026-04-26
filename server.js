@@ -5,17 +5,19 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 
-// Load .env
-try {
-  fs.readFileSync(path.join(__dirname, '.env'), 'utf8').split('\n').forEach(line => {
-    const i = line.indexOf('=');
-    if (i > 0) {
-      const key = line.slice(0, i).trim();
-      const val = line.slice(i + 1).trim();
-      if (key && !key.startsWith('#')) process.env[key] = val;
-    }
-  });
-} catch (e) {}
+// Load .env / .env.local
+for (const envFile of ['.env', '.env.local']) {
+  try {
+    fs.readFileSync(path.join(__dirname, envFile), 'utf8').split('\n').forEach(line => {
+      const i = line.indexOf('=');
+      if (i > 0) {
+        const key = line.slice(0, i).trim();
+        const val = line.slice(i + 1).trim();
+        if (key && !key.startsWith('#')) process.env[key] = val;
+      }
+    });
+  } catch (e) {}
+}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -103,8 +105,16 @@ app.get('/api/decks', auth, h(async (req, res) => {
     SELECT d.*,
       COUNT(c.id)::int AS card_count,
       COUNT(CASE WHEN c.next_review <= NOW() THEN 1 END)::int AS due_count,
-      COUNT(CASE WHEN c.interval_days >= 21 THEN 1 END)::int AS mastered_count,
-      COUNT(CASE WHEN c.review_count > 0 AND c.interval_days < 21 THEN 1 END)::int AS learning_count
+      COUNT(CASE WHEN c.interval_days >= 30
+                  AND c.review_count >= 5
+                  AND (c.correct_count::float / NULLIF(c.review_count,0)) >= 0.85
+                  THEN 1 END)::int AS mastered_count,
+      COUNT(CASE WHEN c.review_count > 0
+                  AND NOT (c.interval_days >= 30
+                           AND c.review_count >= 5
+                           AND (c.correct_count::float / NULLIF(c.review_count,0)) >= 0.85)
+                  THEN 1 END)::int AS learning_count,
+      COUNT(CASE WHEN COALESCE(c.lapse_count,0) >= 4 THEN 1 END)::int AS leech_count
     FROM decks d
     LEFT JOIN cards c ON c.deck_id = d.id
     WHERE d.user_id = $1
@@ -201,8 +211,13 @@ app.get('/api/decks/:id/study', auth, h(async (req, res) => {
   res.json(rows);
 }));
 
+const MAX_INTERVAL_DAYS = 180;
+
 app.post('/api/cards/:id/review', auth, h(async (req, res) => {
   const { rating } = req.body;
+  if (![0, 1, 2, 3].includes(rating)) {
+    return res.status(400).json({ error: 'Rating inválido (0–3)' });
+  }
   const { rows: [card] } = await pool.query(
     `SELECT c.* FROM cards c JOIN decks d ON c.deck_id = d.id
      WHERE c.id = $1 AND d.user_id = $2`,
@@ -210,26 +225,43 @@ app.post('/api/cards/:id/review', auth, h(async (req, res) => {
   );
   if (!card) return res.status(404).json({ error: 'Tarjeta no encontrada' });
 
-  let { interval_days, ease_factor, review_count, correct_count } = card;
+  let { interval_days, ease_factor, review_count, correct_count, lapse_count } = card;
+  lapse_count = lapse_count || 0;
+  let next_review;
 
-  if (rating === 1) {
-    interval_days = interval_days === 0 ? 1 : Math.max(1, interval_days * 1.2);
+  if (rating === 0) {
+    // Otra vez: lapso, vuelve a la cola en 1 minuto
+    interval_days = 0;
     ease_factor = Math.max(1.3, ease_factor - 0.2);
+    lapse_count++;
+    next_review = new Date(Date.now() + 60 * 1000);
+  } else if (rating === 1) {
+    // Difícil: acierto pero costoso
+    interval_days = interval_days === 0 ? 1 : Math.max(1, interval_days * 1.2);
+    ease_factor = Math.max(1.3, ease_factor - 0.15);
+    correct_count++;
   } else if (rating === 2) {
+    // Bien: acierto normal
     interval_days = interval_days === 0 ? 3 : Math.max(1, interval_days * ease_factor);
     correct_count++;
   } else {
+    // Fácil
     interval_days = interval_days === 0 ? 7 : Math.max(1, interval_days * ease_factor * 1.3);
     ease_factor = Math.min(3.0, ease_factor + 0.15);
     correct_count++;
   }
+
+  if (rating > 0) {
+    interval_days = Math.min(interval_days, MAX_INTERVAL_DAYS);
+    next_review = new Date(Date.now() + interval_days * 86400000);
+  }
   review_count++;
 
-  const next_review = new Date(Date.now() + interval_days * 86400000);
   const { rows: [updated] } = await pool.query(
     `UPDATE cards SET interval_days=$1, ease_factor=$2, review_count=$3,
-     correct_count=$4, next_review=$5 WHERE id=$6 RETURNING *`,
-    [interval_days, ease_factor, review_count, correct_count, next_review, req.params.id]
+     correct_count=$4, lapse_count=$5, next_review=$6, last_reviewed=NOW()
+     WHERE id=$7 RETURNING *`,
+    [interval_days, ease_factor, review_count, correct_count, lapse_count, next_review, req.params.id]
   );
   res.json(updated);
 }));
