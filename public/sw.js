@@ -1,4 +1,4 @@
-const VERSION = 'v5';
+const VERSION = 'v6';
 const STATIC_CACHE = `mnemo-static-${VERSION}`;
 const RUNTIME_CACHE = `mnemo-runtime-${VERSION}`;
 const PRECACHE = ['/', '/index.html', '/manifest.json', '/icon.svg', '/icon-maskable.svg'];

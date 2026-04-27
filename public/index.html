@@ -600,6 +600,26 @@
       line-height: 1.45;
       word-break: break-word;
       white-space: pre-line;
+      width: 100%;
+      max-width: 100%;
+    }
+    /* KaTeX overflow control: scroll fórmulas largas en horizontal sin desbordar la tarjeta */
+    .flashcard-text .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+      padding: 6px 2px;
+      margin: 8px 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      text-align: left;
+    }
+    .flashcard-text .katex-display > .katex { text-align: left; }
+    .flashcard-text .katex-display > .katex { font-size: 1em; }
+    .flashcard-text .katex { max-width: 100%; }
+    /* fallback: encoger fórmula display si todavía sobra */
+    @media (max-width: 480px) {
+      .flashcard-text .katex-display > .katex { font-size: 0.95em; }
     }
     .flashcard-hint {
       position: absolute; bottom: 16px;
