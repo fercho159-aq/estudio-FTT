@@ -1505,6 +1505,24 @@ function startStudyTick() {
   }, 1000);
 }
 
+async function startPractice(deckId) {
+  const cards = await api('GET', `/decks/${deckId}/study?practice=1`);
+  if (cards.length === 0) {
+    toast('No hay tarjetas para practicar');
+    return;
+  }
+  state.studyCards = cards.slice(0, SESSION_BATCH_SIZE);
+  state.studyBatchSize = state.studyCards.length;
+  state.studyIndex = 0;
+  state.flipped = false;
+  state.results = [];
+  state.studySessionStart = Date.now();
+  state.studyEndReason = null;
+  state.view = 'study';
+  render();
+  startStudyTick();
+}
+
 async function startStudy(deckId) {
   const cards = await api('GET', `/decks/${deckId}/study`);
   if (cards.length === 0) {
@@ -1864,6 +1882,7 @@ function renderDeckDetail() {
       <button class="btn btn-primary btn-block" data-action="startStudy" data-id="${d.id}">
         ${d.due_count > 0 ? `Estudiar ${d.due_count} pendiente${d.due_count !== 1 ? 's' : ''}` : 'Estudiar'}
       </button>
+      ${d.due_count === 0 && d.card_count > 0 ? `<button class="btn btn-secondary btn-block" style="margin-top:10px" data-action="startPractice" data-id="${d.id}">Practicar para dominar</button>` : ''}
     </div>`;
 
   html += `
@@ -2443,6 +2462,7 @@ document.getElementById('app').addEventListener('click', async (e) => {
     case 'openStats': await openStats(); break;
     case 'openDeck': await openDeck(id); break;
     case 'startStudy': await startStudy(id); break;
+    case 'startPractice': await startPractice(id); break;
     case 'flip': flipCard(); break;
     case 'rate': await rateCard(parseInt(target.dataset.rating)); break;
     case 'exitStudy':

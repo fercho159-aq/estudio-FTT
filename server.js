@@ -200,13 +200,16 @@ app.get('/api/decks/:id/study', auth, h(async (req, res) => {
   const deck = await pool.query('SELECT id FROM decks WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
   if (!deck.rows[0]) return res.status(404).json({ error: 'Mazo no encontrado' });
 
-  const { rows } = await pool.query(
-    'SELECT * FROM cards WHERE deck_id = $1 AND next_review <= NOW() ORDER BY next_review LIMIT 15',
-    [req.params.id]
-  );
-  for (let i = rows.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [rows[i], rows[j]] = [rows[j], rows[i]];
+  const practice = req.query.practice === '1';
+  const query = practice
+    ? 'SELECT * FROM cards WHERE deck_id = $1 ORDER BY RANDOM() LIMIT 15'
+    : 'SELECT * FROM cards WHERE deck_id = $1 AND next_review <= NOW() ORDER BY next_review LIMIT 15';
+  const { rows } = await pool.query(query, [req.params.id]);
+  if (!practice) {
+    for (let i = rows.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rows[i], rows[j]] = [rows[j], rows[i]];
+    }
   }
   res.json(rows);
 }));
