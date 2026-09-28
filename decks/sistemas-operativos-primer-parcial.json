@@ -1,0 +1,130 @@
+{
+  "name": "Sistemas Operativos - Primer Parcial",
+  "emoji": "🖥️",
+  "cards": [
+    {
+      "front": "¿Qué es un Sistema Operativo?",
+      "back": "Conjunto de programas que actúa como **intermediario entre el usuario y el hardware**.\nAdministra los recursos del sistema (CPU, memoria, E/S, almacenamiento) y proporciona una plataforma para ejecutar aplicaciones, ocultando la complejidad del hardware."
+    },
+    {
+      "front": "Describe las funciones del Sistema Operativo",
+      "back": "- **Procesos:** crear, planificar, ejecutar y terminar\n- **Memoria:** asignar y liberar memoria\n- **E/S:** controlar dispositivos\n- **Archivos:** crear, leer, escribir y organizar\n- **Seguridad y protección:** controlar el acceso a recursos\n- **Interfaz de usuario:** CLI o GUI\n- **Red:** gestionar comunicaciones"
+    },
+    {
+      "front": "Menciona las clasificaciones de los Sistemas Operativos",
+      "back": "- **Por usuarios:** monousuario / multiusuario\n- **Por tareas:** monotarea / multitarea\n- **Por procesadores:** monoprocesador / multiprocesador\n- **Por tiempo de respuesta:** tiempo real / tiempo compartido / por lotes\n- **Por estructura:** monolítico / capas / microkernel / máquina virtual"
+    },
+    {
+      "front": "¿En qué año fue creado UNIX y en qué laboratorios?",
+      "back": "En **1969**, en los **Laboratorios Bell (AT&T)**.\nLo desarrollaron **Ken Thompson y Dennis Ritchie**; primero en ensamblador y luego reescrito en C, lo que lo hizo portable."
+    },
+    {
+      "front": "Describe 5 características del Sistema Operativo UNIX",
+      "back": "- **Multitarea:** varios procesos a la vez\n- **Multiusuario:** varios usuarios simultáneos\n- **Seguro:** sistema de permisos y control de acceso\n- **Estable:** funciona largos periodos sin reiniciar\n- **Robusto:** resistente a fallos\nTambién es portable (escrito en C) y tiene un sistema de archivos jerárquico."
+    },
+    {
+      "front": "Menciona 5 Sistemas Operativos para dispositivos móviles",
+      "back": "- **Android** (Google, basado en Linux)\n- **iOS** (Apple)\n- **Symbian** (Nokia)\n- **BlackBerry OS** (RIM)\n- **Windows Phone** (Microsoft)"
+    },
+    {
+      "front": "¿En qué año fundó Steve Jobs Apple y cuál era su nombre completo?",
+      "back": "Apple se fundó en **1976** (1 de abril).\nNombre completo: **Steven Paul Jobs**.\nCofundadores: Steve Wozniak y Ronald Wayne, en el garaje de Jobs en Los Altos, California."
+    },
+    {
+      "front": "Describe 3 productos que creó Steve Jobs",
+      "back": "- **Macintosh (1984):** primera computadora personal exitosa con interfaz gráfica y ratón\n- **iPod (2001):** reproductor de música portátil; junto con iTunes transformó la industria musical\n- **iPhone (2007):** smartphone con pantalla táctil que redefinió la telefonía móvil\nOtros: Apple I, Apple II, iMac, iPad."
+    },
+    {
+      "front": "Describe las 5 generaciones de las computadoras",
+      "back": "- **1a (1940-1956):** tubos de vacío (bulbos). ENIAC, UNIVAC. Tarjetas perforadas\n- **2a (1956-1963):** transistores. Más pequeñas y confiables. COBOL, FORTRAN\n- **3a (1963-1971):** circuitos integrados. Multiprogramación. IBM 360\n- **4a (1971-presente):** microprocesadores. Computadoras personales, GUI, redes\n- **5a (actual):** inteligencia artificial, procesamiento paralelo"
+    },
+    {
+      "front": "¿Qué es Software Libre y qué es Software de Licencia (de patente)?",
+      "back": "**Software libre:** se puede usar, estudiar, modificar y redistribuir; el código fuente está disponible. Ej: Linux, LibreOffice, Firefox.\n**Software de licencia (propietario):** el código fuente no está disponible; requiere licencia (generalmente de pago) y no se puede modificar ni redistribuir sin autorización. Ej: Windows, Microsoft Office."
+    },
+    {
+      "front": "Describe 5 distribuciones del Sistema Operativo Linux",
+      "back": "- **Ubuntu:** basada en Debian, fácil de usar (Canonical)\n- **Fedora:** patrocinada por Red Hat, tecnología de vanguardia\n- **Debian:** de las más antiguas y estables, base de muchas otras\n- **OpenSuSE:** de origen alemán, se configura con YaST\n- **Slackware:** de las primeras distribuciones, para usuarios avanzados\nOtra: **Android** usa el kernel Linux."
+    },
+    {
+      "front": "Describe la evolución de las versiones de Windows",
+      "back": "- **Windows 1.0 (1985):** interfaz gráfica sobre MS-DOS\n- **Windows 3.1 (1992):** gran mejora gráfica\n- **Windows 95 (1995):** menú Inicio y barra de tareas\n- **Windows XP (2001):** basado en NT, muy estable\n- **Windows 7 (2009):** corrigió los problemas de Vista\n- **Windows 10 (2015):** regresa el menú Inicio\n- **Windows 11 (2021):** barra centrada, requiere TPM 2.0\nServidor: Windows Server 2003, 2008, 2012, 2016, 2019, 2022."
+    },
+    {
+      "front": "¿Qué es un Sistema Distribuido?",
+      "back": "Conjunto de **computadoras independientes conectadas en red** que se coordinan y aparentan ser **un solo sistema** para el usuario.\nCaracterísticas: compartición de recursos, transparencia, tolerancia a fallos, escalabilidad, comunicación por paso de mensajes."
+    },
+    {
+      "front": "¿Qué es una Máquina Virtual?",
+      "back": "**Emulación por software** de una computadora física; permite ejecutar un sistema operativo completo dentro de otro (anfitrión).\n- **De sistema:** VMware, VirtualBox, Hyper-V\n- **De proceso:** JVM de Java\nVentajas: aislamiento, pruebas seguras, varios SO en un equipo."
+    },
+    {
+      "front": "¿Qué es la memoria? Describe sus tipos",
+      "back": "Dispositivo que almacena datos e instrucciones de forma temporal o permanente.\n**Primaria:** registros, caché, RAM, ROM\n**Secundaria:** disco duro, SSD, USB, cintas magnéticas, discos flexibles"
+    },
+    {
+      "front": "¿Qué es la memoria RAM? Describe sus características",
+      "back": "**Random Access Memory** (memoria de acceso aleatorio).\n- **Volátil:** pierde su contenido al apagar\n- Lectura y escritura\n- Acceso directo a cualquier posición\n- Trabaja con la CPU mediante el **bus de datos** y el **bus de direcciones**\n- Guarda los programas y datos en ejecución"
+    },
+    {
+      "front": "¿Cuáles son las diferencias entre DDR, DDR2, DDR3, DDR4 y DDR5?",
+      "back": "- **DDR:** 2.5 V, 184 pines\n- **DDR2:** 1.8 V, 240 pines\n- **DDR3:** 1.5 V, 240 pines\n- **DDR4:** 1.2 V, 288 pines\n- **DDR5:** 1.1 V, 288 pines\nCada generación: **menor voltaje**, **mayor velocidad** y **mayor capacidad**. No son compatibles entre sí (la muesca está en otra posición)."
+    },
+    {
+      "front": "¿Qué es la memoria ROM? Describe sus características",
+      "back": "**Read Only Memory** (memoria de solo lectura).\n- **No volátil:** conserva la información sin energía\n- Contiene el **BIOS** (firmware de arranque)\n- Almacena las características del sistema\nTipos: PROM, EPROM (se borra con luz UV), EEPROM/Flash (se borra eléctricamente)."
+    },
+    {
+      "front": "¿Qué es la memoria caché?",
+      "back": "Memoria auxiliar de **alta velocidad** ubicada **entre la CPU y la RAM**.\nGuarda copias de los datos que se usan con más frecuencia para que la CPU no espere a la RAM.\nNiveles: **L1** (la más rápida y pequeña), **L2**, **L3** (la más grande, compartida)."
+    },
+    {
+      "front": "Ordena la jerarquía de memoria de la más rápida a la más lenta",
+      "back": "**Registros → Caché → RAM → Disco (secundaria)**\nAl bajar en la jerarquía aumenta la capacidad y baja el costo por bit, pero disminuye la velocidad."
+    },
+    {
+      "front": "¿Qué es la memoria virtual (swap)? ¿Cuánto es el mínimo y cuánto lo recomendado?",
+      "back": "Espacio en **disco** que se usa como extensión de la RAM cuando esta se llena.\n- **Mínimo:** igual al tamaño de la RAM (1x)\n- **Recomendado:** el doble de la RAM (2x)\nEj: con 8 GB de RAM → mínimo 8 GB, recomendado 16 GB."
+    },
+    {
+      "front": "¿Qué es la asignación contigua de memoria?",
+      "back": "Cada proceso se carga en **un solo bloque continuo** de memoria.\nTipos: partición única, particiones estáticas (fijas) y particiones dinámicas.\nVentaja: sencilla. Desventaja: fragmentación."
+    },
+    {
+      "front": "Describe el particionamiento estático",
+      "back": "La memoria se divide en **particiones de tamaño fijo** al arrancar el sistema.\n- Cada partición aloja un proceso\n- Puede usar **colas múltiples** (una por partición) o una cola única\n**Ventaja:** simple, poca carga para el SO\n**Desventaja:** **fragmentación interna**, número fijo de procesos y tamaño máximo limitado"
+    },
+    {
+      "front": "Describe el particionamiento dinámico",
+      "back": "Las particiones se crean **del tamaño exacto del proceso al cargarlo** en memoria.\n**Ventaja:** no hay fragmentación interna, mejor uso de la memoria\n**Desventaja:** **fragmentación externa** (huecos pequeños entre procesos); necesita compactación y algoritmos de asignación"
+    },
+    {
+      "front": "¿Qué es la fragmentación interna y la externa?",
+      "back": "**Interna:** espacio desperdiciado **dentro** de una partición porque el proceso es más pequeño que ella. Ocurre en el particionamiento estático y en la paginación.\n**Externa:** hay suficiente memoria libre en total, pero **no contigua** (huecos dispersos). Ocurre en el particionamiento dinámico y en la segmentación."
+    },
+    {
+      "front": "¿Qué es la compactación de memoria?",
+      "back": "Mover los procesos en memoria para **juntar todos los huecos libres en un solo bloque**.\nResuelve la **fragmentación externa**, pero es costosa en tiempo porque hay que detener y reubicar procesos."
+    },
+    {
+      "front": "¿Qué algoritmos de asignación de memoria existen?",
+      "back": "- **First Fit (primer ajuste):** el primer hueco suficientemente grande; es el más rápido\n- **Best Fit (mejor ajuste):** el hueco más pequeño que alcance; deja fragmentos muy pequeños\n- **Worst Fit (peor ajuste):** el hueco más grande; el sobrante queda utilizable"
+    },
+    {
+      "front": "¿Qué es la paginación?",
+      "back": "Divide la memoria física en **marcos** (frames) y el proceso en **páginas** del mismo tamaño fijo.\nLas páginas se cargan en cualquier marco libre, **no necesariamente contiguo**. Una **tabla de páginas** relaciona cada página con su marco.\nDirección lógica = número de página + desplazamiento.\nElimina la fragmentación externa (puede quedar fragmentación interna en la última página)."
+    },
+    {
+      "front": "¿Qué es la segmentación?",
+      "back": "Divide el proceso en **segmentos de tamaño variable** que corresponden a partes lógicas del programa (código, datos, pila).\nUna **tabla de segmentos** guarda la base y el límite de cada uno.\nDirección lógica = número de segmento + desplazamiento.\nProduce **fragmentación externa**."
+    },
+    {
+      "front": "Describe los algoritmos de reemplazo de páginas FIFO, LRU y Óptimo",
+      "back": "- **FIFO:** reemplaza la página que lleva **más tiempo en memoria**. Simple; puede presentar la anomalía de Belady\n- **LRU:** reemplaza la página que **lleva más tiempo sin usarse**\n- **Óptimo:** reemplaza la página que **tardará más en volver a usarse**. Es el que menos fallos produce, pero no se puede implementar (requiere conocer el futuro); sirve como referencia"
+    },
+    {
+      "front": "¿Cómo se llama el ingeniero que imparte Sistemas Operativos?",
+      "back": "**Ing. Ángel Isidro Mercado** (Facultad de Ingeniería, UNAM, Grupo 01)"
+    }
+  ]
+}

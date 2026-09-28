@@ -26,7 +26,7 @@ const pool = new Pool({
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mnemo-dev-fallback';
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 app.use((req, res, next) => {
   if (req.path === '/sw.js' || req.path === '/manifest.json') {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -131,6 +131,55 @@ app.post('/api/decks', auth, h(async (req, res) => {
     [name, emoji || '📚', req.user.id]
   );
   res.json(rows[0]);
+}));
+
+const MAX_IMPORT_CARDS = 2000;
+
+app.post('/api/decks/import', auth, h(async (req, res) => {
+  const { name, emoji, cards } = req.body || {};
+  if (typeof name !== 'string' || !name.trim()) {
+    return res.status(400).json({ error: 'El JSON necesita un "name" (nombre del mazo)' });
+  }
+  if (!Array.isArray(cards) || cards.length === 0) {
+    return res.status(400).json({ error: 'El JSON necesita un arreglo "cards" con al menos una tarjeta' });
+  }
+  if (cards.length > MAX_IMPORT_CARDS) {
+    return res.status(400).json({ error: `Máximo ${MAX_IMPORT_CARDS} tarjetas por importación` });
+  }
+  const fronts = [], backs = [];
+  for (let i = 0; i < cards.length; i++) {
+    const c = cards[i] || {};
+    const front = typeof c.front === 'string' ? c.front.trim() : '';
+    const back = typeof c.back === 'string' ? c.back.trim() : '';
+    if (!front || !back) {
+      return res.status(400).json({ error: `La tarjeta ${i + 1} necesita "front" y "back" con texto` });
+    }
+    fronts.push(front);
+    backs.push(back);
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: [deck] } = await client.query(
+      'INSERT INTO decks (name, emoji, user_id) VALUES ($1, $2, $3) RETURNING *',
+      [name.trim(), (typeof emoji === 'string' && emoji.trim()) || '📚', req.user.id]
+    );
+    // created_at escalonado para conservar el orden del archivo
+    await client.query(
+      `INSERT INTO cards (deck_id, front, back, created_at)
+       SELECT $1, f, b, NOW() + (n * INTERVAL '1 millisecond')
+       FROM unnest($2::text[], $3::text[]) WITH ORDINALITY AS t(f, b, n)`,
+      [deck.id, fronts, backs]
+    );
+    await client.query('COMMIT');
+    res.json({ ...deck, card_count: fronts.length });
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
 }));
 
 app.put('/api/decks/:id', auth, h(async (req, res) => {

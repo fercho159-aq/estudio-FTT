@@ -1586,6 +1586,26 @@ async function saveDeck(name, emoji) {
   render();
 }
 
+async function importDeck(text) {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    toast(text.trim() ? 'El JSON no es válido' : 'Pega el JSON o elige un archivo');
+    return;
+  }
+  if (Array.isArray(data)) { toast('Falta "name": envuelve las tarjetas en { "name": ..., "cards": [...] }'); return; }
+  try {
+    const deck = await api('POST', '/decks/import', data);
+    state.modal = null;
+    await loadDecks();
+    toast(`Mazo importado: ${deck.card_count} tarjetas`);
+    render();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
 async function deleteDeck(id) {
   await api('DELETE', `/decks/${id}`);
   state.modal = null;
@@ -2251,6 +2271,21 @@ function renderModal() {
       <div class="modal-actions">
         <button class="btn btn-secondary" data-action="closeModal">Cancelar</button>
         <button class="btn btn-primary" data-action="submitDeck">${isEdit ? 'Guardar' : 'Crear'}</button>
+      </div>
+      ${isEdit ? '' : `<button class="btn btn-ghost btn-block" style="margin-top:8px" data-action="showImport">Importar mazo desde JSON</button>`}`;
+  } else if (m.type === 'import') {
+    content = `
+      <div class="sheet-handle"></div>
+      <h2 class="modal-title">Importar mazo</h2>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label">Pega el JSON</label>
+        <textarea class="textarea" id="import-json" style="min-height:200px;font-family:ui-monospace,monospace;font-size:14px" placeholder='{"name": "Mi mazo", "emoji": "📚", "cards": [{"front": "Pregunta", "back": "Respuesta"}]}'></textarea>
+      </div>
+      <button class="btn btn-secondary btn-sm btn-block" data-action="pickImportFile">O elige un archivo .json</button>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-action="closeModal">Cancelar</button>
+        <button class="btn btn-primary" data-action="submitImport">Importar</button>
       </div>`;
   } else if (m.type === 'card') {
     const isEdit = m.mode === 'editCard';
@@ -2498,6 +2533,17 @@ document.getElementById('app').addEventListener('click', async (e) => {
       await saveDeck(name, state.modal.emoji || '📚');
       break;
     }
+    case 'showImport':
+      state.modal = { type: 'import' };
+      render();
+      setTimeout(() => document.getElementById('import-json')?.focus(), 100);
+      break;
+    case 'pickImportFile':
+      document.getElementById('import-file')?.click();
+      break;
+    case 'submitImport':
+      await importDeck(document.getElementById('import-json')?.value || '');
+      break;
     case 'showCreateCard':
       state.modal = { type: 'card', mode: 'createCard' };
       render();
@@ -2558,6 +2604,14 @@ document.getElementById('app').addEventListener('click', async (e) => {
       render();
       break;
   }
+});
+
+document.getElementById('app').addEventListener('change', async (e) => {
+  if (e.target.id !== 'import-file') return;
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const ta = document.getElementById('import-json');
+  if (ta) ta.value = await file.text();
 });
 
 // Keyboard shortcuts
