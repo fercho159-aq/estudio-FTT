@@ -17,8 +17,10 @@ try {
       }
     });
 } catch (e) {
-  console.error('No se pudo leer .env.local:', e.message);
-  process.exit(1);
+  if (!process.env.DATABASE_URL) {
+    console.error('No se pudo leer .env.local y DATABASE_URL no está definida:', e.message);
+    process.exit(1);
+  }
 }
 
 const [, , username, mdPath] = process.argv;
