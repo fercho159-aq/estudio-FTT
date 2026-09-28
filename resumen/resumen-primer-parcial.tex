@@ -15,6 +15,10 @@
 \usepackage{fancyhdr}
 \usepackage{amssymb}
 \usepackage{needspace}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,patterns,calc,decorations.pathreplacing,shapes.geometric,fit,backgrounds}
+\usepackage{caption}
+\captionsetup{font=small,labelfont={bf,color=acento2},skip=4pt}
 \usepackage[hidelinks]{hyperref}
 
 \definecolor{acento}{HTML}{C2562D}
@@ -52,6 +56,28 @@
 
 \newcommand{\clave}[1]{\textbf{\color{acento}#1}}
 
+% Diagrama que no se parte entre páginas, con pie de figura
+\newenvironment{diagrama}[1]
+  {\par\medskip\noindent\begin{minipage}{\linewidth}\centering\def\diagcap{#1}}
+  {\par\captionof{figure}{\diagcap}\end{minipage}\par\medskip}
+
+\tikzset{
+  caja/.style={draw=acento2, fill=acento2!8, rounded corners=2pt, align=center,
+               font=\small, minimum height=0.8cm, inner sep=4pt},
+  cajaA/.style={caja, draw=acento, fill=acento!15},
+  cajaG/.style={caja, draw=gray!60, fill=gray!12},
+  flecha/.style={-{Stealth[length=2.2mm]}, thick, black!65},
+  flecha2/.style={{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}, thick, black!65},
+  mem/.style={draw=black!60},
+  so/.style={mem, fill=gray!35},
+  proc/.style={mem, fill=acento2!22},
+  libre/.style={mem, fill=white},
+  fragi/.style={mem, pattern=north east lines, pattern color=acento},
+  etq/.style={font=\scriptsize, align=center},
+}
+% Segmento de memoria horizontal: \seg{inicio}{fin}{estilo}{texto}
+\newcommand{\seg}[4]{\draw[#3] (#1,0) rectangle (#2,1); \node[etq] at ({(#1+#2)/2},0.5) {#4};}
+
 \begin{document}
 
 \begin{titlepage}
@@ -82,7 +108,28 @@ Administra los recursos de la computadora (CPU, memoria, dispositivos de entrada
 y da una plataforma para que funcionen las aplicaciones. Oculta la complejidad del hardware: el usuario
 no necesita saber cómo funciona el disco para guardar un archivo.
 
+\begin{diagrama}{El sistema operativo como capa intermedia entre el usuario y el hardware.}
+\begin{tikzpicture}[every node/.style={minimum width=8cm}]
+  \node[cajaG] (u) {\textbf{Usuario}};
+  \node[caja, below=0.25cm of u] (a) {\textbf{Aplicaciones} \quad (navegador, Word, juegos\ldots)};
+  \node[cajaA, below=0.25cm of a, minimum height=1.1cm] (so) {\large\textbf{Sistema Operativo}\\[-1pt]\footnotesize administra y reparte los recursos};
+  \node[cajaG, below=0.25cm of so] (h) {\textbf{Hardware} \quad CPU $\cdot$ Memoria $\cdot$ E/S $\cdot$ Disco};
+  \draw[decorate,decoration={brace,amplitude=6pt},thick,acento]
+    ([xshift=6pt]a.north east) -- ([xshift=6pt]h.south east)
+    node[midway,right=9pt,font=\small,align=left,text=acento,minimum width=0pt]{El SO es el\\ \textbf{intermediario}};
+\end{tikzpicture}
+\end{diagrama}
+
 \subsection{Funciones del Sistema Operativo}
+\begin{diagrama}{Las seis funciones principales del sistema operativo.}
+\begin{tikzpicture}
+  \node[cajaA, circle, minimum size=2.4cm, font=\small\bfseries] (so) {Sistema\\Operativo};
+  \foreach \ang/\txt in {90/{Procesos}, 30/{Memoria}, -30/{Entrada y\\salida (E/S)}, -90/{Archivos}, -150/{Seguridad y\\protección}, 150/{Interfaz de\\usuario}}{
+    \node[caja, minimum width=2.8cm] (n\ang) at (\ang:3.3cm) {\txt};
+    \draw[thick, acento2!70] (so) -- (n\ang);
+  }
+\end{tikzpicture}
+\end{diagrama}
 \begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{5.2cm}L}
 \toprule
 Función & Qué hace \\
@@ -140,6 +187,16 @@ Windows Phone & Microsoft & Descontinuado \\
 \end{tabularx}
 
 \subsection{Generaciones de las computadoras}
+\begin{diagrama}{Línea del tiempo: cada generación la define su tecnología principal.}
+\begin{tikzpicture}[x=1cm]
+  \draw[flecha, line width=1.2pt] (0,0) -- (16.4,0);
+  \foreach \x/\gen/\anio/\tec in {1.4/1a/1946/{Bulbos}, 4.6/2a/1959/{Transistores}, 7.8/3a/1964/{Circuitos\\integrados}, 11/4a/1971/{Micro-\\procesador}, 14.2/5a/{hoy}/{Inteligencia\\artificial}}{
+    \fill[acento] (\x,0) circle (4pt);
+    \node[above=5pt, font=\small\bfseries, text=acento] at (\x,0) {\gen\ \normalfont\color{black!70}(\anio)};
+    \node[below=6pt, caja, minimum width=2.6cm, anchor=north] at (\x,0) {\tec};
+  }
+\end{tikzpicture}
+\end{diagrama}
 \begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{2.9cm}>{\raggedright}p{3.9cm}L}
 \toprule
 Generación & Tecnología & Datos clave \\
@@ -162,21 +219,26 @@ Generación & Tecnología & Datos clave \\
   \item \textbf{Fundó Apple en} \clave{1976} (1 de abril) con \textbf{Steve Wozniak} y \textbf{Ronald Wayne}, en el garaje de su casa en California.
 \end{itemize}
 
-\needspace{12\baselineskip}
-\textbf{Línea del tiempo:}\par
-\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{1.4cm}L}
-\toprule
-1976 & Apple I \\
-1977 & Apple II \\
-1984 & \clave{Macintosh}: la primera computadora personal exitosa con interfaz gráfica y ratón \\
-1985 & Lo sacan de Apple; funda \textbf{NeXT} y compra \textbf{Pixar} \\
-1997 & Regresa a Apple \\
-1998 & iMac \\
-2001 & \clave{iPod} \\
-2007 & \clave{iPhone} \\
-2010 & iPad \\
-\bottomrule
-\end{tabularx}
+\begin{diagrama}{Línea del tiempo de Steve Jobs; en naranja, los productos que conviene aprender.}
+\begin{tikzpicture}[x=0.95cm]
+  \draw[flecha, line width=1.2pt] (-0.3,0) -- (16.6,0);
+  \foreach \x/\anio/\txt/\lado/\imp in {
+      0.5/1976/{Funda Apple\\Apple I}/1/0, 2.3/1977/{Apple II}/0/0,
+      4.1/1984/{\textbf{Macintosh}\\interfaz gráfica}/1/1, 5.9/1985/{Sale de Apple:\\NeXT y Pixar}/0/0,
+      7.7/1997/{Regresa\\a Apple}/1/0, 9.5/1998/{iMac}/0/0,
+      11.3/2001/{\textbf{iPod}}/1/1, 13.1/2007/{\textbf{iPhone}}/0/1, 14.9/2010/{iPad}/1/0}{
+    \ifnum\imp=1 \def\c{acento}\else\def\c{acento2}\fi
+    \fill[\c] (\x,0) circle (3.5pt);
+    \ifnum\lado=1
+      \draw[\c, thick] (\x,0) -- (\x,0.45);
+      \node[anchor=south, font=\scriptsize, align=center, text=\c] at (\x,0.45) {{\small\bfseries\anio}\\\txt};
+    \else
+      \draw[\c, thick] (\x,0) -- (\x,-0.45);
+      \node[anchor=north, font=\scriptsize, align=center, text=\c] at (\x,-0.45) {{\small\bfseries\anio}\\\txt};
+    \fi
+  }
+\end{tikzpicture}
+\end{diagrama}
 
 \textbf{Tres productos para el examen:}
 \begin{itemize}
@@ -240,6 +302,22 @@ Es un conjunto de \clave{computadoras independientes conectadas en red} que trab
 \textbf{toleran fallos}, son \textbf{escalables} y se comunican por \textbf{paso de mensajes}.
 \textbf{Ejemplos:} la nube, Google, clusters.
 
+\begin{diagrama}{Varias computadoras en red que el usuario percibe como un solo sistema.}
+\begin{tikzpicture}
+  \node[cajaA, circle, minimum size=1.5cm] (red) {\textbf{Red}};
+  \foreach \ang/\n in {45/1, 135/2, 225/3, 315/4}{
+    \node[caja, minimum width=2.1cm] (pc\n) at (\ang:2.3cm) {Computadora \n};
+    \draw[thick, acento2!70] (red) -- (pc\n);
+  }
+  \begin{scope}[on background layer]
+    \node[draw=acento, dashed, rounded corners=6pt, thick, fit=(pc1)(pc2)(pc3)(pc4), inner sep=8pt] (sd) {};
+  \end{scope}
+  \node[font=\small\bfseries, text=acento, above=1pt of sd.north] {Sistema distribuido};
+  \node[cajaG, minimum width=2cm] (usr) at ([xshift=3.6cm]sd.east) {\textbf{Usuario}};
+  \draw[flecha] (usr.west) -- (sd.east) node[midway, above=2pt, font=\scriptsize, align=center] {lo ve como\\\textbf{un solo sistema}};
+\end{tikzpicture}
+\end{diagrama}
+
 \subsection{Máquina virtual}
 Es una \clave{computadora simulada por software} que permite ejecutar un sistema operativo completo
 \textbf{dentro de otro} (el sistema anfitrión).
@@ -248,6 +326,22 @@ Es una \clave{computadora simulada por software} que permite ejecutar un sistema
   \item \textbf{De proceso:} la JVM de Java.
   \item \textbf{Ventajas:} aislamiento, pruebas seguras, varios sistemas operativos en un mismo equipo.
 \end{itemize}
+
+\begin{diagrama}{Una sola computadora física ejecutando dos máquinas virtuales.}
+\begin{tikzpicture}[node distance=0.2cm]
+  \node[cajaG, minimum width=11cm] (hw) {\textbf{Hardware físico} (CPU, memoria, disco)};
+  \node[caja, minimum width=11cm, above=of hw] (host) {\textbf{Sistema operativo anfitrión} (ej. Windows)};
+  \node[cajaA, minimum width=11cm, above=of host] (hyp) {\textbf{Hipervisor / software de virtualización} (VirtualBox, VMware)};
+  \node[caja, minimum width=5.35cm, above=of hyp.north west, anchor=south west] (g1) {SO invitado: \textbf{Linux}};
+  \node[caja, minimum width=5.35cm, above=of hyp.north east, anchor=south east] (g2) {SO invitado: \textbf{Windows}};
+  \node[cajaG, minimum width=5.35cm, above=of g1] (a1) {Aplicaciones};
+  \node[cajaG, minimum width=5.35cm, above=of g2] (a2) {Aplicaciones};
+  \node[draw=acento, dashed, thick, rounded corners=4pt, fit=(g1)(a1), inner sep=3pt,
+        label={[font=\scriptsize\bfseries, text=acento]above:Máquina virtual 1}] {};
+  \node[draw=acento, dashed, thick, rounded corners=4pt, fit=(g2)(a2), inner sep=3pt,
+        label={[font=\scriptsize\bfseries, text=acento]above:Máquina virtual 2}] {};
+\end{tikzpicture}
+\end{diagrama}
 
 \newpage
 %=====================================================================
@@ -269,12 +363,20 @@ ROM & Cintas magnéticas, discos flexibles \\
 \end{tabularx}
 
 \subsection{Jerarquía de memoria}
-\begin{center}
-\Large\textbf{Registros} $\rightarrow$ \textbf{Caché} $\rightarrow$ \textbf{RAM} $\rightarrow$ \textbf{Disco}
-\end{center}
+\begin{diagrama}{Pirámide de memoria: arriba lo más rápido y pequeño, abajo lo más lento y grande.}
+\begin{tikzpicture}[scale=0.95]
+  \foreach \i/\txt/\col in {0/{Disco duro / SSD (memoria secundaria)}/gray!18, 1/{RAM}/acento2!18, 2/{Caché (L1, L2, L3)}/acento2!35, 3/{Registros}/acento!40}{
+    \fill[\col, draw=black!55] ({-(9-1.9*\i)/2},\i) -- ({(9-1.9*\i)/2},\i) -- ({(9-1.9*(\i+1))/2},\i+1) -- ({-(9-1.9*(\i+1))/2},\i+1) -- cycle;
+    \node[font=\small\bfseries] at (0,\i+0.5) {\txt};
+  }
+  \draw[flecha, acento, line width=1.3pt] (5.6,0) -- (5.6,4) node[midway, right, font=\small, align=left, text=acento] {Más \textbf{rápida}\\Más \textbf{cara} por bit};
+  \path (0,-0.35);
+  \draw[flecha, acento2, line width=1.3pt] (-5.6,4) -- (-5.6,0) node[midway, left, font=\small, align=right, text=acento2] {Más \textbf{capacidad}\\Más \textbf{barata}};
+\end{tikzpicture}
+\end{diagrama}
 \begin{itemize}
-  \item Hacia la izquierda: \textbf{más rápida, más cara y más pequeña}.
-  \item Hacia la derecha: \textbf{más lenta, más barata y más grande}.
+  \item Hacia arriba: \textbf{más rápida, más cara y más pequeña}.
+  \item Hacia abajo: \textbf{más lenta, más barata y más grande}.
 \end{itemize}
 
 \subsection{Memoria RAM (Random Access Memory)}
@@ -285,6 +387,20 @@ ROM & Cintas magnéticas, discos flexibles \\
   \item Trabaja con la CPU a través del \clave{bus de datos} y el \clave{bus de direcciones}.
   \item Guarda los \textbf{programas y datos que se están ejecutando}.
 \end{itemize}
+
+\begin{diagrama}{Cómo se conectan los tipos de memoria con la CPU.}
+\begin{tikzpicture}[node distance=1.5cm]
+  \node[cajaA, minimum width=2.4cm, minimum height=1.6cm] (cpu) {\textbf{CPU}\\[2pt]\footnotesize contiene los\\[-2pt]\footnotesize \textbf{registros}};
+  \node[caja, right=of cpu, minimum width=2.2cm, minimum height=1.6cm] (cache) {\textbf{Caché}\\\footnotesize muy rápida};
+  \node[caja, right=3cm of cache, minimum width=2.4cm, minimum height=1.6cm] (ram) {\textbf{RAM}\\\footnotesize volátil\\[-2pt]\footnotesize lectura/escritura};
+  \node[cajaG, below=1.3cm of cpu, minimum width=2.4cm] (rom) {\textbf{ROM} (BIOS)\\\footnotesize no volátil};
+  \node[cajaG, below=1.3cm of ram, minimum width=2.4cm] (disco) {\textbf{Disco duro}\\\footnotesize incluye el \textbf{swap}};
+  \draw[flecha2] (cpu) -- (cache);
+  \draw[flecha2] (cache) -- node[above=2pt, etq] {bus de datos\\bus de direcciones} (ram);
+  \draw[flecha] (rom) -- node[left, etq] {arranque} (cpu);
+  \draw[flecha2, dashed] (ram) -- node[right, etq, align=left] {memoria virtual:\\páginas que no\\caben en RAM} (disco);
+\end{tikzpicture}
+\end{diagrama}
 
 \subsection{DDR, DDR2, DDR3, DDR4 y DDR5}
 \begin{center}
@@ -354,6 +470,40 @@ Colas & Una por partición (colas múltiples) o una cola única & --- \\
 \textbf{Estático $\rightarrow$ Interna} \qquad \textbf{Dinámico $\rightarrow$ Externa}
 \end{truco}
 
+\begin{diagrama}{Particionamiento estático: particiones fijas; lo que el proceso no usa se desperdicia (fragmentación interna).}
+\begin{tikzpicture}[x=0.38cm, y=0.9cm]
+  \seg{0}{8}{so}{\textbf{SO}}
+  \seg{8}{15}{proc}{\textbf{A}\\7 MB}
+  \seg{15}{18}{fragi}{}
+  \seg{18}{22}{proc}{\textbf{B}\\4 MB}
+  \seg{22}{28}{fragi}{}
+  \seg{28}{39}{proc}{\textbf{C}\\11 MB}
+  \seg{39}{40}{fragi}{}
+  \foreach \x in {0,8,18,28,40} \draw[very thick] (\x,-0.15) -- (\x,1.15);
+  \foreach \a/\b/\t in {8/18/{Partición 1: 10 MB}, 18/28/{Partición 2: 10 MB}, 28/40/{Partición 3: 12 MB}}
+    \draw[decorate,decoration={brace,amplitude=4pt},thick,acento2] (\a+0.2,1.2) -- (\b-0.2,1.2) node[midway,above=4pt,etq,text=acento2]{\t};
+  \draw[flecha, acento] (18,-0.95) -- (16.5,-0.05);
+  \draw[flecha, acento] (22,-0.95) -- (25,-0.05);
+  \draw[flecha, acento] (26,-0.95) -- (39.5,-0.05);
+  \node[etq, text=acento, font=\small\bfseries] at (20,-1.25) {Fragmentación interna (espacio desperdiciado dentro de cada partición)};
+\end{tikzpicture}
+\end{diagrama}
+
+\begin{diagrama}{Particionamiento dinámico: cada proceso ocupa lo justo, pero quedan huecos sueltos (fragmentación externa).}
+\begin{tikzpicture}[x=0.38cm, y=0.9cm]
+  \seg{0}{8}{so}{\textbf{SO}}
+  \seg{8}{15}{proc}{\textbf{A}\\7 MB}
+  \seg{15}{18}{libre}{3 MB}
+  \seg{18}{26}{proc}{\textbf{B}\\8 MB}
+  \seg{26}{29}{libre}{3 MB}
+  \seg{29}{37}{proc}{\textbf{C}\\8 MB}
+  \seg{37}{40}{libre}{3 MB}
+  \foreach \x in {16.5,27.5,38.5} \draw[flecha, acento] (\x,-0.8) -- (\x,-0.05);
+  \node[etq, text=acento, font=\small\bfseries, align=center] at (20,-1.25) {Fragmentación externa: hay 9 MB libres en total, pero repartidos en huecos de 3 MB};
+  \node[cajaA, font=\scriptsize] at (27.5,2) {Nuevo proceso \textbf{D} de \textbf{8 MB} $\rightarrow$ \textbf{no cabe} en ningún hueco};
+\end{tikzpicture}
+\end{diagrama}
+
 \subsection{Fragmentación}
 \begin{itemize}
   \item \clave{Interna:} espacio desperdiciado \textbf{dentro} de una partición porque el proceso es más chico que ella.\\
@@ -366,6 +516,29 @@ Colas & Una por partición (colas múltiples) o una cola única & --- \\
 Consiste en \clave{mover los procesos para juntar todos los huecos libres en un solo bloque}.
 Resuelve la \textbf{fragmentación externa}, pero \textbf{tarda mucho}, porque hay que detener y reubicar los procesos.
 
+\begin{diagrama}{Compactación: se recorren los procesos y los huecos se juntan en uno solo.}
+\begin{tikzpicture}[x=0.35cm, y=0.9cm]
+  \node[etq, font=\small\bfseries, anchor=east] at (-0.4,0.5) {Antes};
+  \seg{0}{8}{so}{\textbf{SO}}
+  \seg{8}{15}{proc}{\textbf{A}}
+  \seg{15}{18}{libre}{3}
+  \seg{18}{26}{proc}{\textbf{B}}
+  \seg{26}{29}{libre}{3}
+  \seg{29}{37}{proc}{\textbf{C}}
+  \seg{37}{40}{libre}{3}
+  \draw[flecha, acento, line width=1.3pt] (20,-0.2) -- (20,-1.1) node[midway, right, etq, text=acento] {\textbf{compactar}};
+  \begin{scope}[yshift=-2.2cm]
+    \node[etq, font=\small\bfseries, anchor=east] at (-0.4,0.5) {Después};
+    \seg{0}{8}{so}{\textbf{SO}}
+    \seg{8}{15}{proc}{\textbf{A}}
+    \seg{15}{23}{proc}{\textbf{B}}
+    \seg{23}{31}{proc}{\textbf{C}}
+    \seg{31}{40}{libre}{\textbf{9 MB libres juntos}}
+    \node[etq, text=acento, font=\small\bfseries] at (35.5,-0.45) {ahora D (8 MB) sí cabe};
+  \end{scope}
+\end{tikzpicture}
+\end{diagrama}
+
 \subsection{Algoritmos de asignación (particionamiento dinámico)}
 \begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{4.2cm}L}
 \toprule
@@ -376,6 +549,24 @@ Best Fit (mejor ajuste) & El hueco \clave{más pequeño} donde quepa; deja hueco
 Worst Fit (peor ajuste) & El hueco \clave{más grande}; lo que sobra todavía sirve para otro proceso \\
 \bottomrule
 \end{tabularx}
+
+\begin{diagrama}{Dónde coloca cada algoritmo un proceso nuevo de 7 MB (en gris, memoria ocupada).}
+\begin{tikzpicture}[x=0.29cm, y=0.9cm]
+  \seg{0}{5}{so}{\textbf{SO}}
+  \seg{5}{8}{so}{}
+  \seg{8}{18}{libre}{10 MB}
+  \seg{18}{21}{so}{}
+  \seg{21}{25}{libre}{4 MB}
+  \seg{25}{28}{so}{}
+  \seg{28}{44}{libre}{16 MB}
+  \seg{44}{47}{so}{}
+  \seg{47}{55}{libre}{8 MB}
+  \draw[flecha, acento2, line width=1.2pt] (13,2.1) node[above, caja, font=\scriptsize] {\textbf{First Fit}\\el primero que alcanza} -- (13,1.05);
+  \draw[flecha, acento2, line width=1.2pt] (36,2.1) node[above, caja, font=\scriptsize] {\textbf{Worst Fit}\\el más grande} -- (36,1.05);
+  \draw[flecha, acento2, line width=1.2pt] (51,2.1) node[above, caja, font=\scriptsize] {\textbf{Best Fit}\\el más ajustado} -- (51,1.05);
+  \node[etq, font=\scriptsize, text=black!60] at (23,-0.35) {el hueco de 4 MB es muy chico: ninguno lo usa};
+\end{tikzpicture}
+\end{diagrama}
 
 \begin{aviso}
 Las secciones de \textbf{paginación}, \textbf{segmentación} y \textbf{algoritmos de reemplazo} están escritas
@@ -391,12 +582,70 @@ con conceptos generales de la materia, no con las diapositivas del curso. Compá
   \item \textbf{Elimina la fragmentación externa}, aunque puede quedar un poco de interna en la última página.
 \end{itemize}
 
+\colorlet{p0}{acento!35}\colorlet{p1}{acento2!35}\colorlet{p2}{OliveGreen!35}\colorlet{p3}{Plum!35}
+\begin{diagrama}{Paginación: las páginas del proceso quedan en marcos separados; la tabla de páginas dice dónde está cada una.}
+\begin{tikzpicture}[font=\small]
+  \node[font=\small\bfseries, text=acento2] at (0,1.3) {Proceso (lógica)};
+  \node[font=\small\bfseries, text=acento2] at (4.65,1.3) {Tabla de páginas};
+  \node[font=\small\bfseries, text=acento2] at (9.6,1.3) {Memoria física};
+  % páginas
+  \foreach \i in {0,...,3}
+    \node[draw=black!60, fill=p\i, minimum width=2.2cm, minimum height=0.7cm] (pg\i) at (0,-\i*0.8) {Página \i};
+  % tabla
+  \node[draw=black!60, fill=gray!15, minimum width=1.3cm, minimum height=0.55cm, font=\scriptsize\bfseries] at (4.0,0.68) {Página};
+  \node[draw=black!60, fill=gray!15, minimum width=1.3cm, minimum height=0.55cm, font=\scriptsize\bfseries] at (5.3,0.68) {Marco};
+  \foreach \i/\m in {0/5, 1/2, 2/7, 3/0}{
+    \node[draw=black!60, fill=p\i, minimum width=1.3cm, minimum height=0.8cm] (tp\i) at (4.0,-\i*0.8) {\i};
+    \node[draw=black!60, fill=white, minimum width=1.3cm, minimum height=0.8cm] (tm\i) at (5.3,-\i*0.8) {\textbf{\m}};
+    \draw[flecha, black!35] (pg\i.east) -- (tp\i.west);
+  }
+  % marcos
+  \foreach \j in {0,...,7}
+    \node[draw=black!60, fill=gray!8, minimum width=2.4cm, minimum height=0.55cm, font=\scriptsize] (mc\j) at (9.6,0.6-\j*0.55) {};
+  \foreach \j in {0,...,7}
+    \node[font=\scriptsize, anchor=west, text=black!60] at (10.85,0.6-\j*0.55) {marco \j};
+  \foreach \i/\m in {0/5, 1/2, 2/7, 3/0}{
+    \node[draw=black!60, fill=p\i, minimum width=2.4cm, minimum height=0.55cm, font=\scriptsize] at (mc\m) {Página \i};
+    \draw[flecha, black!50] (tm\i.east) -- (mc\m.west);
+  }
+\end{tikzpicture}
+\end{diagrama}
+
 \subsection{Segmentación}
 \begin{itemize}
   \item El proceso se divide en \clave{segmentos de tamaño variable} que siguen su estructura lógica: \textbf{código, datos y pila}.
   \item La \clave{tabla de segmentos} guarda la \textbf{base} (dónde empieza cada segmento) y el \textbf{límite} (cuánto mide).
   \item Produce \textbf{fragmentación externa}.
 \end{itemize}
+
+\begin{diagrama}{Segmentación: cada segmento tiene su propio tamaño; la tabla guarda dónde empieza (base) y cuánto mide (límite).}
+\begin{tikzpicture}[font=\small]
+  \node[font=\small\bfseries, text=acento2] at (0,3.5) {Proceso (lógica)};
+  \node[font=\small\bfseries, text=acento2] at (4.9,3.5) {Tabla de segmentos};
+  \node[font=\small\bfseries, text=acento2] at (10.2,3.5) {Memoria física};
+  % segmentos lógicos
+  \node[draw=black!60, fill=p0, minimum width=2.2cm, minimum height=1.6cm, align=center] at (0,2.1) {Seg. 0\\\textbf{Código}};
+  \node[draw=black!60, fill=p1, minimum width=2.2cm, minimum height=0.64cm] at (0,0.6) {Seg. 1 \textbf{Datos}};
+  \node[draw=black!60, fill=p2, minimum width=2.2cm, minimum height=1.76cm, align=center] at (0,-0.9) {Seg. 2\\\textbf{Pila}};
+  % tabla
+  \foreach \x/\h in {3.7/Seg., 4.95/Base, 6.2/Límite}
+    \node[draw=black!60, fill=gray!15, minimum width=1.25cm, minimum height=0.55cm, font=\scriptsize\bfseries] at (\x,2.6) {\h};
+  \foreach \r/\s/\b/\l in {0/0/1400/1000, 1/1/6300/400, 2/2/4300/1100}{
+    \node[draw=black!60, fill=p\s, minimum width=1.25cm, minimum height=0.6cm] at (3.7,2.05-\r*0.6) {\s};
+    \node[draw=black!60, fill=white, minimum width=1.25cm, minimum height=0.6cm] at (4.95,2.05-\r*0.6) {\b};
+    \node[draw=black!60, fill=white, minimum width=1.25cm, minimum height=0.6cm] at (6.2,2.05-\r*0.6) {\l};
+  }
+  % memoria (0 a 7000 bytes)
+  \draw[draw=black!60, fill=gray!8] (9,{3}) rectangle (11.4,{3-7000*0.00085});
+  \foreach \s/\a/\b/\t in {0/1400/2400/Código, 2/4300/5400/Pila, 1/6300/6700/Datos}{
+    \draw[draw=black!60, fill=p\s] (9,{3-\a*0.00085}) rectangle (11.4,{3-\b*0.00085});
+    \node[font=\scriptsize\bfseries] at (10.2,{3-(\a+\b)/2*0.00085}) {\t};
+  }
+  \foreach \v in {0,1400,2400,4300,5400,6300,6700}
+    \node[font=\scriptsize, anchor=east, text=black!60] at (8.95,{3-\v*0.00085}) {\v};
+  \node[font=\scriptsize, text=black!55, align=center] at (10.2,{3-3350*0.00085}) {otros\\procesos};
+\end{tikzpicture}
+\end{diagrama}
 \begin{nota}
 \textbf{Paginación vs.\ segmentación:} la paginación usa bloques de \textbf{tamaño fijo} y genera fragmentación
 \textbf{interna}; la segmentación usa bloques de \textbf{tamaño variable} y genera fragmentación \textbf{externa}.
@@ -411,6 +660,42 @@ Se usan cuando la memoria está llena y hay que sacar una página para meter otr
   \item \clave{Óptimo:} saca la página que \textbf{tardará más en volver a usarse}. Es el mejor, pero
         \textbf{no se puede implementar} porque necesitaría conocer el futuro; solo sirve como referencia.
 \end{itemize}
+
+\needspace{22\baselineskip}
+\textbf{Ejemplo paso a paso} con 3 marcos y la cadena de referencias
+\textbf{7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3}. Cada punto marca un \clave{fallo de página} (la página no estaba en memoria y hubo que cargarla);
+la celda coloreada muestra en qué marco se cargó, reemplazando a la que había.
+\begin{diagrama}{El mismo ejemplo con los tres algoritmos: Óptimo tiene menos fallos, luego LRU y al final FIFO.}
+\small\setlength{\tabcolsep}{5.5pt}\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l|*{12}{c}}
+\multicolumn{13}{l}{\textbf{FIFO} --- \clave{10 fallos}}\\[2pt]
+\hline
+Ref. & \textbf{7} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{0} & \textbf{3} & \textbf{0} & \textbf{4} & \textbf{2} & \textbf{3} & \textbf{0} & \textbf{3}\\ \hline
+Marco 1 & \cellcolor{acento!30}\textbf{7} & 7 & 7 & \cellcolor{acento!30}\textbf{2} & 2 & 2 & 2 & \cellcolor{acento!30}\textbf{4} & 4 & 4 & \cellcolor{acento!30}\textbf{0} & 0\\
+Marco 2 &  & \cellcolor{acento!30}\textbf{0} & 0 & 0 & 0 & \cellcolor{acento!30}\textbf{3} & 3 & 3 & \cellcolor{acento!30}\textbf{2} & 2 & 2 & 2\\
+Marco 3 &  &  & \cellcolor{acento!30}\textbf{1} & 1 & 1 & 1 & \cellcolor{acento!30}\textbf{0} & 0 & 0 & \cellcolor{acento!30}\textbf{3} & 3 & 3\\
+\hline
+Fallo & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} &  & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \\ \hline
+\noalign{\vspace{8pt}}
+\multicolumn{13}{l}{\textbf{LRU} --- \clave{9 fallos}}\\[2pt]
+\hline
+Ref. & \textbf{7} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{0} & \textbf{3} & \textbf{0} & \textbf{4} & \textbf{2} & \textbf{3} & \textbf{0} & \textbf{3}\\ \hline
+Marco 1 & \cellcolor{acento!30}\textbf{7} & 7 & 7 & \cellcolor{acento!30}\textbf{2} & 2 & 2 & 2 & \cellcolor{acento!30}\textbf{4} & 4 & 4 & \cellcolor{acento!30}\textbf{0} & 0\\
+Marco 2 &  & \cellcolor{acento!30}\textbf{0} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \cellcolor{acento!30}\textbf{3} & 3 & 3\\
+Marco 3 &  &  & \cellcolor{acento!30}\textbf{1} & 1 & 1 & \cellcolor{acento!30}\textbf{3} & 3 & 3 & \cellcolor{acento!30}\textbf{2} & 2 & 2 & 2\\
+\hline
+Fallo & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} &  & \textcolor{acento}{$\bullet$} &  & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \\ \hline
+\noalign{\vspace{8pt}}
+\multicolumn{13}{l}{\textbf{Óptimo} --- \clave{7 fallos}}\\[2pt]
+\hline
+Ref. & \textbf{7} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{0} & \textbf{3} & \textbf{0} & \textbf{4} & \textbf{2} & \textbf{3} & \textbf{0} & \textbf{3}\\ \hline
+Marco 1 & \cellcolor{acento!30}\textbf{7} & 7 & 7 & \cellcolor{acento!30}\textbf{2} & 2 & 2 & 2 & 2 & 2 & 2 & \cellcolor{acento!30}\textbf{0} & 0\\
+Marco 2 &  & \cellcolor{acento!30}\textbf{0} & 0 & 0 & 0 & 0 & 0 & \cellcolor{acento!30}\textbf{4} & 4 & 4 & 4 & 4\\
+Marco 3 &  &  & \cellcolor{acento!30}\textbf{1} & 1 & 1 & \cellcolor{acento!30}\textbf{3} & 3 & 3 & 3 & 3 & 3 & 3\\
+\hline
+Fallo & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} & \textcolor{acento}{$\bullet$} &  & \textcolor{acento}{$\bullet$} &  & \textcolor{acento}{$\bullet$} &  &  & \textcolor{acento}{$\bullet$} & \\ \hline
+\end{tabular}
+\end{diagrama}
 
 %=====================================================================
 \section{Preguntas extra del examen}
