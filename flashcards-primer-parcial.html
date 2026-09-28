@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcards - Primer Parcial Sistemas Operativos</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --card-front: #334155;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --success: #4ade80;
+  --danger: #f87171;
+  --warning: #fbbf24;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 16px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.header h1 {
+  font-size: 1.4rem;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.progress-bar {
+  width: 100%;
+  max-width: 600px;
+  margin: 12px auto;
+  height: 6px;
+  background: var(--card-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 12px 0;
+  font-size: 0.85rem;
+}
+.stat { display: flex; align-items: center; gap: 4px; }
+.stat .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.dot-correct { background: var(--success); }
+.dot-incorrect { background: var(--danger); }
+.dot-remaining { background: var(--text-muted); }
+.controls-top {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 6px 14px;
+  border: 1px solid var(--text-muted);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.card-container {
+  max-width: 600px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+.card {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  cursor: pointer;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+.card.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  min-height: 280px;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.card-front {
+  background: linear-gradient(135deg, var(--card-front), var(--card-bg));
+  border: 1px solid #475569;
+}
+.card-back {
+  background: linear-gradient(135deg, #1a3a2a, #1e293b);
+  border: 1px solid #2d5a3d;
+  transform: rotateY(180deg);
+  overflow-y: auto;
+  justify-content: flex-start;
+  text-align: left;
+}
+.card-number {
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.card-topic {
+  font-size: 0.7rem;
+  color: var(--accent2);
+  margin-bottom: 12px;
+  padding: 2px 10px;
+  border: 1px solid var(--accent2);
+  border-radius: 12px;
+}
+.card-question {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.card-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+.card-back .card-number { color: var(--success); }
+.card-answer {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  width: 100%;
+}
+.card-answer strong { color: var(--accent); }
+.card-answer ul {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+.card-answer li { margin: 3px 0; }
+.nav-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.nav-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-prev { background: var(--card-bg); color: var(--text); }
+.btn-prev:hover:not(:disabled) { background: #334155; }
+.btn-correct { background: #166534; color: white; }
+.btn-correct:hover:not(:disabled) { background: #15803d; }
+.btn-incorrect { background: #991b1b; color: white; }
+.btn-incorrect:hover:not(:disabled) { background: #b91c1c; }
+.btn-next { background: var(--card-bg); color: var(--text); }
+.btn-next:hover:not(:disabled) { background: #334155; }
+.counter {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-width: 60px;
+  text-align: center;
+}
+.filter-section {
+  max-width: 600px;
+  margin: 0 auto 16px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.filter-btn {
+  padding: 4px 10px;
+  border: 1px solid #475569;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active { background: var(--accent2); color: white; border-color: var(--accent2); }
+.summary {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 24px;
+  background: var(--card-bg);
+  border-radius: 16px;
+  text-align: center;
+  display: none;
+}
+.summary h2 { color: var(--accent); margin-bottom: 12px; }
+.summary .score { font-size: 2.5rem; font-weight: bold; margin: 12px 0; }
+.summary .score.good { color: var(--success); }
+.summary .score.ok { color: var(--warning); }
+.summary .score.bad { color: var(--danger); }
+.keyboard-hint {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Sistemas Operativos - Primer Parcial</h1>
+  <p>Ing. Angel Isidro Mercado | FI UNAM | Grupo 01</p>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<div class="stats">
+  <div class="stat"><div class="dot dot-correct"></div><span id="correctCount">0</span> correctas</div>
+  <div class="stat"><div class="dot dot-incorrect"></div><span id="incorrectCount">0</span> incorrectas</div>
+  <div class="stat"><div class="dot dot-remaining"></div><span id="remainingCount">32</span> restantes</div>
+</div>
+
+<div class="filter-section">
+  <button class="filter-btn active" onclick="setFilter('all')">Todas</button>
+  <button class="filter-btn" onclick="setFilter('tema1')">Tema 1</button>
+  <button class="filter-btn" onclick="setFilter('tema2')">Tema 2</button>
+  <button class="filter-btn" onclick="setFilter('extra')">Extra</button>
+</div>
+
+<div class="controls-top">
+  <button class="btn" onclick="shuffleCards()">Mezclar</button>
+  <button class="btn" onclick="resetAll()">Reiniciar</button>
+  <button class="btn" id="onlyWrongBtn" onclick="showOnlyWrong()">Solo incorrectas</button>
+</div>
+
+<div class="card-container" id="cardContainer">
+  <div class="card" id="card" onclick="flipCard()">
+    <div class="card-face card-front">
+      <div class="card-number" id="cardNum"></div>
+      <div class="card-topic" id="cardTopic"></div>
+      <div class="card-question" id="cardQuestion"></div>
+      <div class="card-hint">Toca para ver la respuesta</div>
+    </div>
+    <div class="card-face card-back">
+      <div class="card-number" id="cardNumBack">RESPUESTA</div>
+      <div class="card-answer" id="cardAnswer"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-buttons">
+  <button class="nav-btn btn-prev" id="prevBtn" onclick="prevCard()">&#9664;</button>
+  <button class="nav-btn btn-incorrect" onclick="markIncorrect()">&#10007;</button>
+  <div class="counter" id="counter"></div>
+  <button class="nav-btn btn-correct" onclick="markCorrect()">&#10003;</button>
+  <button class="nav-btn btn-next" id="nextBtn" onclick="nextCard()">&#9654;</button>
+</div>
+
+<div class="keyboard-hint">
+  Teclado: Espacio = voltear | &#8592;&#8594; = navegar | C = correcta | X = incorrecta
+</div>
+
+<div class="summary" id="summary">
+  <h2>Resultado Final</h2>
+  <div class="score" id="finalScore"></div>
+  <p id="finalMsg"></p>
+  <br>
+  <button class="btn" onclick="resetAll()">Intentar de nuevo</button>
+  <button class="btn" style="margin-left:8px" onclick="showOnlyWrong()">Repasar incorrectas</button>
+</div>
+
+<script>
+const allCards = [
+  {
+    id: 1, topic: "Tema 1", tag: "tema1",
+    q: "Describe 5 caracteristicas del Sistema Operativo UNIX",
+    a: "<strong>Caracteristicas de UNIX:</strong><ul><li><strong>Multitarea:</strong> Permite ejecutar varias tareas o procesos al mismo tiempo</li><li><strong>Multiusuario:</strong> Varios usuarios pueden trabajar simultaneamente en el sistema</li><li><strong>Seguro:</strong> Cuenta con un robusto sistema de permisos y control de acceso</li><li><strong>Estable:</strong> Es altamente confiable, puede funcionar por largos periodos sin reiniciar</li><li><strong>Robusto:</strong> Resistente a fallos, con gran capacidad de recuperacion</li></ul><p>Tambien es portable (escrito en C) y tiene un sistema de archivos jerarquico.</p>"
+  },
+  {
+    id: 2, topic: "Tema 1", tag: "tema1",
+    q: "Menciona en que ano fue creado UNIX y en que laboratorios",
+    a: "<strong>UNIX fue creado en 1969</strong> en los <strong>Laboratorios Bell</strong> (Bell Labs) de AT&T.<br><br>Fue desarrollado por <strong>Ken Thompson y Dennis Ritchie</strong>. Inicialmente fue escrito en ensamblador y luego reescrito en el lenguaje C (creado por Ritchie), lo que lo hizo portable a diferentes plataformas."
+  },
+  {
+    id: 3, topic: "Tema 1", tag: "tema1",
+    q: "Menciona 5 Sistemas Operativos para dispositivos moviles",
+    a: "<strong>5 Sistemas Operativos moviles:</strong><ul><li><strong>Android</strong> - Google (basado en Linux)</li><li><strong>iOS</strong> - Apple (basado en UNIX/Darwin)</li><li><strong>Symbian</strong> - Nokia (discontinuado)</li><li><strong>BlackBerry OS</strong> - Research In Motion (discontinuado)</li><li><strong>Windows Phone</strong> - Microsoft (discontinuado)</li></ul><p>Otros: HarmonyOS (Huawei), Tizen (Samsung), Firefox OS.</p>"
+  },
+  {
+    id: 4, topic: "Tema 1", tag: "tema1",
+    q: "Menciona el ano en que Steve Jobs fundo Apple y el nombre completo de Steve Jobs",
+    a: "<strong>Steve Jobs</strong> fundo <strong>Apple en 1976</strong> (1 de abril).<br><br>Su nombre completo era <strong>Steven Paul Jobs</strong>.<br><br>Co-fundo Apple junto con <strong>Steve Wozniak</strong> y <strong>Ronald Wayne</strong> en el garaje de la casa de Jobs en Los Altos, California."
+  },
+  {
+    id: 5, topic: "Tema 1", tag: "tema1",
+    q: "Describe las funciones del Sistema Operativo",
+    a: "<strong>Funciones del Sistema Operativo:</strong><ul><li><strong>Administracion de procesos:</strong> Crear, planificar, ejecutar y terminar procesos</li><li><strong>Administracion de memoria:</strong> Asignar y liberar memoria para los procesos</li><li><strong>Administracion de E/S:</strong> Controlar dispositivos de entrada/salida</li><li><strong>Administracion de archivos:</strong> Crear, leer, escribir y organizar archivos</li><li><strong>Seguridad y proteccion:</strong> Controlar acceso a recursos del sistema</li><li><strong>Interfaz de usuario:</strong> Proporcionar medio de comunicacion (CLI o GUI)</li><li><strong>Gestion de red:</strong> Manejar comunicaciones en red</li></ul>"
+  },
+  {
+    id: 6, topic: "Tema 1", tag: "tema1",
+    q: "Menciona las clasificaciones de los Sistemas Operativos",
+    a: "<strong>Clasificaciones de SO:</strong><ul><li><strong>Por numero de usuarios:</strong> Monousuario / Multiusuario</li><li><strong>Por numero de tareas:</strong> Monotarea / Multitarea</li><li><strong>Por numero de procesadores:</strong> Monoprocesador / Multiprocesador</li><li><strong>Por tiempo de respuesta:</strong> Tiempo real / Tiempo compartido / Por lotes (batch)</li><li><strong>Por estructura:</strong> Monolitico / Capas / Microkernel / Maquina virtual</li></ul><p>Ejemplos: Windows (multiusuario, multitarea), MS-DOS (monousuario, monotarea), Linux (multiusuario, multitarea).</p>"
+  },
+  {
+    id: 7, topic: "Tema 1", tag: "tema1",
+    q: "Que es un Sistema Operativo?",
+    a: "<strong>Un Sistema Operativo</strong> es un <strong>conjunto de programas</strong> que actua como intermediario entre el usuario y el hardware de la computadora.<br><br>Es el software fundamental que <strong>administra los recursos del sistema</strong> (CPU, memoria, dispositivos de E/S, almacenamiento) y proporciona una <strong>plataforma</strong> para que las aplicaciones de usuario se ejecuten.<br><br>Funciona como una <strong>capa de abstraccion</strong> que oculta la complejidad del hardware y facilita la interaccion con la computadora."
+  },
+  {
+    id: 8, topic: "Tema 1", tag: "tema1",
+    q: "Describe las 5 generaciones de las computadoras",
+    a: "<strong>Generaciones:</strong><ul><li><strong>1a (1940-1956):</strong> Tubos de vacio (bulbos). ENIAC, UNIVAC. Enormes, lentas, costosas. Tarjetas perforadas.</li><li><strong>2a (1956-1963):</strong> Transistores. Mas pequenas, rapidas y confiables. Lenguajes: COBOL, FORTRAN.</li><li><strong>3a (1963-1971):</strong> Circuitos integrados. Mas compactas. Sistemas operativos multiprogramacion. IBM 360.</li><li><strong>4a (1971-presente):</strong> Microprocesadores (VLSI). Computadoras personales. Intel 4004. GUI, redes, internet.</li><li><strong>5a (actualidad):</strong> Inteligencia artificial, computacion cuantica, procesamiento paralelo, redes neuronales.</li></ul>"
+  },
+  {
+    id: 9, topic: "Tema 1", tag: "tema1",
+    q: "Describe 3 productos que creo Steve Jobs",
+    a: "<strong>Productos creados por Steve Jobs:</strong><ul><li><strong>Macintosh (1984):</strong> Primera computadora personal con interfaz grafica de usuario (GUI) y raton comercialmente exitosa. Revoluciono la computacion personal.</li><li><strong>iPod (2001):</strong> Reproductor de musica digital portatil que transformo la industria musical con iTunes Store.</li><li><strong>iPhone (2007):</strong> Smartphone con pantalla tactil que redefinio la telefonia movil y creo la era de las apps.</li></ul><p>Otros: Apple I, Apple II, iPad, iMac, MacBook, Pixar (peliculas animadas).</p>"
+  },
+  {
+    id: 10, topic: "Tema 1", tag: "tema1",
+    q: "Describe que es Software Libre y que es Software de Licencia (de patente)",
+    a: "<strong>Software Libre:</strong><br>Software que respeta la libertad de los usuarios. Se puede <strong>usar, copiar, estudiar, modificar y redistribuir</strong> libremente. El codigo fuente esta disponible. Ejemplo: Linux, LibreOffice, Firefox.<br>Las 4 libertades: usar, estudiar, distribuir, mejorar.<br><br><strong>Software de Licencia (Patente):</strong><br>Software <strong>propietario</strong> cuyo codigo fuente no esta disponible. Se requiere una <strong>licencia de pago</strong> para usarlo. No se puede copiar, modificar ni redistribuir sin autorizacion. Ejemplo: Windows, Microsoft Office, Adobe Photoshop."
+  },
+  {
+    id: 11, topic: "Tema 1", tag: "tema1",
+    q: "Describe 5 distribuciones del Sistema Operativo Linux",
+    a: "<strong>Distribuciones de Linux:</strong><ul><li><strong>Ubuntu:</strong> Basada en Debian, orientada a facilidad de uso. Muy popular para escritorio. Canonical Ltd.</li><li><strong>Fedora:</strong> Patrocinada por Red Hat. Tecnologias de vanguardia. Base para RHEL.</li><li><strong>Debian:</strong> Una de las mas antiguas y estables. Usa apt. Base de muchas otras distros.</li><li><strong>OpenSuSE:</strong> Origen aleman. YaST para configuracion. Comunidad y empresarial (SLES).</li><li><strong>Slackware:</strong> Una de las primeras distribuciones. Minimalista, orientada a usuarios avanzados.</li></ul><p>Otras: Arch Linux, Mint, CentOS, Android (basado en kernel Linux), Kali Linux.</p>"
+  },
+  {
+    id: 12, topic: "Tema 1", tag: "tema1",
+    q: "Describe la evolucion de las versiones de Windows (mencionar al menos 6)",
+    a: "<strong>Evolucion de Windows:</strong><ul><li><strong>Windows 1.0 (1985):</strong> Primera version, interfaz grafica sobre MS-DOS</li><li><strong>Windows 3.1 (1992):</strong> Gran mejora grafica, muy popular</li><li><strong>Windows 95 (1995):</strong> Menu Inicio, barra de tareas, boton Inicio</li><li><strong>Windows XP (2001):</strong> Muy estable y popular, basado en NT</li><li><strong>Windows 7 (2009):</strong> Exitoso, mejoro Vista, barra de tareas rediseñada</li><li><strong>Windows 10 (2015):</strong> Regreso del Menu Inicio, Cortana, Edge</li><li><strong>Windows 11 (2021):</strong> Diseño renovado, barra centrada, requisito TPM 2.0</li></ul><p>Servidor: Windows Server 2003, 2008, 2012, 2016, 2019, 2022.</p>"
+  },
+  {
+    id: 13, topic: "Tema 1", tag: "tema1",
+    q: "Que es un Sistema Distribuido?",
+    a: "<strong>Sistema Distribuido:</strong> Es un conjunto de <strong>computadoras independientes</strong> (nodos) conectadas por una red que se <strong>coordinan</strong> para realizar tareas, aparentando ser un <strong>unico sistema coherente</strong> ante el usuario.<br><br><strong>Caracteristicas:</strong><ul><li>Comparticion de recursos (archivos, impresoras, procesamiento)</li><li>Transparencia (el usuario no percibe la distribucion)</li><li>Tolerancia a fallos</li><li>Escalabilidad</li><li>Comunicacion por paso de mensajes</li></ul><p>Ejemplos: Google, clusters, computacion en la nube, blockchain.</p>"
+  },
+  {
+    id: 14, topic: "Tema 1", tag: "tema1",
+    q: "Que es una Maquina Virtual?",
+    a: "<strong>Maquina Virtual:</strong> Es una <strong>emulacion por software</strong> de una computadora fisica que ejecuta programas como si fuera una maquina real.<br><br>Permite ejecutar un <strong>sistema operativo completo</strong> dentro de otro sistema operativo (anfitrion/host).<br><br><strong>Tipos:</strong><ul><li><strong>De sistema:</strong> Emula hardware completo (VMware, VirtualBox, Hyper-V)</li><li><strong>De proceso:</strong> Ejecuta un programa individual (JVM de Java)</li></ul><strong>Ventajas:</strong> Aislamiento, pruebas seguras, multiples SO en un equipo, snapshots, portabilidad."
+  },
+  {
+    id: 15, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Memoria? Describe los tipos de memoria",
+    a: "<strong>Memoria:</strong> Dispositivo que almacena datos e instrucciones de forma temporal o permanente.<br><br><strong>Memoria Primaria (interna):</strong><ul><li><strong>Registros:</strong> Dentro del CPU, ultra rapidos, muy poca capacidad</li><li><strong>Cache:</strong> Entre CPU y RAM, muy rapida, almacena datos frecuentes</li><li><strong>RAM:</strong> Volatil, acceso aleatorio, almacena programas en ejecucion</li><li><strong>ROM:</strong> No volatil, solo lectura, contiene firmware/BIOS</li></ul><strong>Memoria Secundaria (externa):</strong><ul><li>Disco Duro (HDD), SSD, USB, Cintas magneticas, Discos flexibles, CD/DVD</li></ul><p>Jerarquia: Registros > Cache > RAM > Disco (velocidad disminuye, capacidad aumenta)</p>"
+  },
+  {
+    id: 16, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Memoria RAM? Describe sus caracteristicas",
+    a: "<strong>RAM (Random Access Memory):</strong> Memoria de acceso aleatorio.<br><br><strong>Caracteristicas:</strong><ul><li><strong>Volatil:</strong> Pierde su contenido al apagar el equipo</li><li><strong>Acceso aleatorio:</strong> Se puede acceder a cualquier posicion directamente</li><li><strong>Lectura/Escritura:</strong> Se puede leer y escribir datos</li><li><strong>Comunicacion con CPU:</strong> A traves del bus de datos y bus de direcciones</li><li><strong>Almacena temporalmente:</strong> Programas y datos en ejecucion</li><li><strong>Velocidad:</strong> Mucho mas rapida que el almacenamiento secundario</li></ul><p>Tipos: SRAM (estatica, cache) y DRAM (dinamica, memoria principal).</p>"
+  },
+  {
+    id: 17, topic: "Tema 2", tag: "tema2",
+    q: "Cuales son las diferencias entre DDR, DDR2, DDR3, DDR4 y DDR5?",
+    a: "<strong>Evolucion DDR:</strong><table style='width:100%;font-size:0.8rem;border-collapse:collapse;margin-top:8px'><tr style='color:var(--accent)'><td></td><td><strong>Voltaje</strong></td><td><strong>Pines</strong></td><td><strong>Velocidad</strong></td></tr><tr><td><strong>DDR</strong></td><td>2.5V</td><td>184</td><td>200-400 MHz</td></tr><tr><td><strong>DDR2</strong></td><td>1.8V</td><td>240</td><td>400-800 MHz</td></tr><tr><td><strong>DDR3</strong></td><td>1.5V</td><td>240</td><td>800-1600 MHz</td></tr><tr><td><strong>DDR4</strong></td><td>1.2V</td><td>288</td><td>1600-3200 MHz</td></tr><tr><td><strong>DDR5</strong></td><td>1.1V</td><td>288</td><td>3200-6400 MHz</td></tr></table><br><p>Cada generacion: menor voltaje (menor consumo), mayor velocidad, mayor capacidad maxima. NO son compatibles entre si (diferente muesca).</p>"
+  },
+  {
+    id: 18, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Memoria ROM? Describe sus caracteristicas",
+    a: "<strong>ROM (Read Only Memory):</strong> Memoria de solo lectura.<br><br><strong>Caracteristicas:</strong><ul><li><strong>No volatil:</strong> Conserva informacion sin energia</li><li><strong>Solo lectura:</strong> Su contenido no se puede modificar facilmente</li><li><strong>Almacena el BIOS/UEFI:</strong> Firmware que inicia el sistema</li><li><strong>Almacena caracteristicas del sistema:</strong> Configuracion basica del hardware</li><li><strong>Permanente:</strong> Los datos persisten indefinidamente</li></ul><strong>Tipos:</strong><ul><li><strong>PROM:</strong> Programable una sola vez</li><li><strong>EPROM:</strong> Borrable con luz ultravioleta</li><li><strong>EEPROM:</strong> Borrable electricamente (Flash)</li></ul>"
+  },
+  {
+    id: 19, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Memoria Cache? Describe sus caracteristicas",
+    a: "<strong>Memoria Cache:</strong> Memoria auxiliar de alta velocidad ubicada entre la CPU y la RAM.<br><br><strong>Caracteristicas:</strong><ul><li><strong>Ultra rapida:</strong> Mucho mas rapida que la RAM</li><li><strong>Pequena capacidad:</strong> Tipicamente de KB a unos pocos MB</li><li><strong>Almacena datos frecuentes:</strong> Guarda copias de los datos mas utilizados de la RAM</li><li><strong>Reduce latencia:</strong> Evita que el CPU espere a la RAM</li><li><strong>Transparente al programador:</strong> El hardware la gestiona automaticamente</li></ul><strong>Niveles:</strong><ul><li><strong>L1:</strong> Mas rapida, mas pequena (dentro del nucleo)</li><li><strong>L2:</strong> Intermedia (por nucleo o compartida)</li><li><strong>L3:</strong> Mas grande, mas lenta (compartida entre nucleos)</li></ul>"
+  },
+  {
+    id: 20, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Memoria Virtual (Swap)? Cuanto es el minimo y cuanto es lo recomendado?",
+    a: "<strong>Memoria Virtual (Swap):</strong> Espacio en el <strong>disco duro</strong> que se usa como extension de la RAM cuando esta se llena.<br><br>Permite ejecutar programas que requieren mas memoria de la que hay fisicamente disponible, moviendo paginas inactivas de RAM al disco.<br><br><strong>Tamano:</strong><ul><li><strong>Minimo recomendado:</strong> Igual al tamano de la RAM (1x RAM)</li><li><strong>Recomendado:</strong> El doble de la RAM (2x RAM)</li></ul><p><strong>Ejemplo:</strong> Si tienes 8 GB de RAM:<br>- Minimo swap: 8 GB<br>- Recomendado: 16 GB</p><p><strong>Desventaja:</strong> El disco es mucho mas lento que la RAM, por lo que el uso excesivo de swap degrada el rendimiento.</p>"
+  },
+  {
+    id: 21, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Asignacion Contigua de Memoria?",
+    a: "<strong>Asignacion Contigua:</strong> Esquema de gestion de memoria donde cada proceso se carga en un <strong>bloque unico y continuo</strong> de memoria.<br><br>La memoria se divide en particiones y cada proceso ocupa una sola particion sin interrupciones.<br><br><strong>Tipos:</strong><ul><li><strong>Particion unica:</strong> Un solo proceso en memoria a la vez</li><li><strong>Particiones multiples estaticas:</strong> Memoria dividida en particiones fijas</li><li><strong>Particiones multiples dinamicas:</strong> Particiones creadas segun necesidad</li></ul><strong>Ventaja:</strong> Simple de implementar, acceso rapido<br><strong>Desventaja:</strong> Fragmentacion (interna o externa segun el tipo)"
+  },
+  {
+    id: 22, topic: "Tema 2", tag: "tema2",
+    q: "Describe el Particionamiento Estatico (caracteristicas, ventajas, desventajas)",
+    a: "<strong>Particionamiento Estatico:</strong> La memoria se divide en <strong>particiones de tamano fijo</strong> al iniciar el sistema. Los tamanos no cambian durante la ejecucion.<br><br><strong>Caracteristicas:</strong><ul><li>Las particiones se definen al arrancar el SO</li><li>Cada particion puede alojar un proceso</li><li>Se pueden usar colas multiples (una por particion) o cola unica</li></ul><strong>Ventajas:</strong><ul><li>Simple de implementar</li><li>Bajo overhead del SO</li></ul><strong>Desventajas:</strong><ul><li><strong>Fragmentacion interna:</strong> Si un proceso es menor que la particion, el espacio sobrante se desperdicia</li><li>Numero fijo de procesos en memoria</li><li>Limita el tamano maximo de un proceso al de la particion mas grande</li></ul>"
+  },
+  {
+    id: 23, topic: "Tema 2", tag: "tema2",
+    q: "Describe el Particionamiento Dinamico (caracteristicas, ventajas, desventajas)",
+    a: "<strong>Particionamiento Dinamico:</strong> Las particiones se crean <strong>del tamano exacto</strong> que necesita cada proceso al momento de cargarlo en memoria.<br><br><strong>Caracteristicas:</strong><ul><li>Las particiones se crean y destruyen dinamicamente</li><li>Cada proceso recibe exactamente la memoria que necesita</li><li>No hay tamano fijo predefinido</li></ul><strong>Ventajas:</strong><ul><li>No hay fragmentacion interna</li><li>Uso mas eficiente de memoria</li><li>No hay limite artificial al tamano del proceso</li></ul><strong>Desventajas:</strong><ul><li><strong>Fragmentacion externa:</strong> Quedan huecos pequenos entre procesos que no se pueden usar</li><li>Requiere algoritmos de asignacion (First Fit, Best Fit, Worst Fit)</li><li>Necesita compactacion periodica (costoso en tiempo)</li></ul>"
+  },
+  {
+    id: 24, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Fragmentacion Interna y la Fragmentacion Externa?",
+    a: "<strong>Fragmentacion Interna:</strong><br>Espacio <strong>desperdiciado dentro</strong> de una particion asignada. Ocurre cuando un proceso es <strong>mas pequeno</strong> que la particion que se le asigna. El espacio sobrante no se puede usar.<br>Se da en: <strong>Particionamiento Estatico</strong> y Paginacion.<br><br><strong>Fragmentacion Externa:</strong><br>Espacio <strong>libre total suficiente</strong> en memoria, pero <strong>no contiguo</strong>. Hay muchos huecos pequenos entre procesos que individualmente son muy chicos para un nuevo proceso.<br>Se da en: <strong>Particionamiento Dinamico</strong> y Segmentacion.<br><br><strong>Solucion a fragmentacion externa:</strong> Compactacion (mover procesos para juntar huecos) o Paginacion (elimina necesidad de memoria contigua)."
+  },
+  {
+    id: 25, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Paginacion? Describe su funcionamiento",
+    a: "<strong>Paginacion:</strong> Esquema de gestion de memoria que divide:<ul><li>La <strong>memoria fisica</strong> en bloques de tamano fijo llamados <strong>marcos (frames)</strong></li><li>El <strong>espacio logico</strong> del proceso en bloques del mismo tamano llamados <strong>paginas</strong></li></ul><strong>Funcionamiento:</strong><ul><li>Las paginas de un proceso se cargan en marcos disponibles (no necesariamente contiguos)</li><li>Una <strong>tabla de paginas</strong> mapea cada pagina a su marco correspondiente</li><li>La direccion logica se compone de: numero de pagina + desplazamiento</li></ul><strong>Ventajas:</strong> Elimina fragmentacion externa, no requiere memoria contigua<br><strong>Desventaja:</strong> Puede haber fragmentacion interna en la ultima pagina; overhead de la tabla de paginas."
+  },
+  {
+    id: 26, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Segmentacion? Describe sus caracteristicas",
+    a: "<strong>Segmentacion:</strong> Esquema de gestion de memoria que divide el espacio logico de un proceso en <strong>segmentos de tamano variable</strong>, cada uno representando una unidad logica del programa.<br><br><strong>Segmentos tipicos:</strong> Codigo, datos, pila (stack), heap.<br><br><strong>Caracteristicas:</strong><ul><li>Cada segmento tiene un <strong>nombre/numero</strong> y una <strong>longitud</strong></li><li>Una <strong>tabla de segmentos</strong> almacena base (direccion fisica) y limite (tamano)</li><li>La direccion logica: numero de segmento + desplazamiento</li></ul><strong>Ventajas:</strong> Refleja la estructura logica del programa, facilita comparticion y proteccion<br><strong>Desventaja:</strong> Produce <strong>fragmentacion externa</strong> (segmentos de tamano variable)"
+  },
+  {
+    id: 27, topic: "Tema 2", tag: "tema2",
+    q: "Describe los algoritmos de reemplazo de paginas (FIFO, LRU, Optimo)",
+    a: "<strong>Algoritmos de Reemplazo de Paginas:</strong><br>Cuando la memoria esta llena y se necesita cargar una nueva pagina, se debe elegir cual pagina sacar.<br><br><ul><li><strong>FIFO (First In, First Out):</strong> Reemplaza la pagina que lleva <strong>mas tiempo</strong> en memoria (la mas antigua). Simple pero puede sacar paginas muy usadas. Puede sufrir la <strong>anomalia de Belady</strong>.</li><li><strong>LRU (Least Recently Used):</strong> Reemplaza la pagina que <strong>no se ha usado por mas tiempo</strong>. Mejor rendimiento que FIFO. Requiere registrar el tiempo de uso.</li><li><strong>Optimo (OPT):</strong> Reemplaza la pagina que <strong>no se usara por mas tiempo</strong> en el futuro. Da el menor numero de fallos, pero es <strong>imposible de implementar</strong> en la practica (requiere conocer el futuro). Se usa como referencia teorica.</li></ul>"
+  },
+  {
+    id: 28, topic: "Tema 2", tag: "tema2",
+    q: "Que es la Compactacion de Memoria?",
+    a: "<strong>Compactacion:</strong> Tecnica que resuelve la <strong>fragmentacion externa</strong> moviendo todos los procesos en memoria para que ocupen posiciones contiguas, juntando todos los <strong>huecos libres en un solo bloque</strong> grande.<br><br><strong>Proceso:</strong><ul><li>Se detienen temporalmente los procesos</li><li>Se reubican a posiciones contiguas</li><li>Se actualizan las direcciones de memoria</li><li>Se crea un unico bloque libre grande</li></ul><strong>Ventaja:</strong> Elimina fragmentacion externa, permite cargar procesos mas grandes.<br><strong>Desventaja:</strong> Es <strong>costoso en tiempo</strong> (mover muchos datos), requiere parar procesos. Se usa en particionamiento dinamico."
+  },
+  {
+    id: 29, topic: "Tema 2", tag: "tema2",
+    q: "Describe la jerarquia de memoria (de mas rapida a mas lenta)",
+    a: "<strong>Jerarquia de Memoria</strong> (de mas rapida/cara/pequena a mas lenta/barata/grande):<br><br><ol><li><strong>Registros del CPU</strong> - Ultra rapidos, bytes, dentro del procesador</li><li><strong>Memoria Cache</strong> (L1, L2, L3) - Muy rapida, KB a MB</li><li><strong>Memoria RAM</strong> - Rapida, GB, volatil</li><li><strong>Almacenamiento SSD</strong> - Moderada, GB a TB, no volatil</li><li><strong>Disco Duro (HDD)</strong> - Lenta, TB, no volatil, mecanico</li><li><strong>Cintas magneticas / Almacenamiento en nube</strong> - Mas lenta, PB, respaldo</li></ol><br><p>A medida que se baja en la jerarquia: <strong>aumenta</strong> la capacidad y el costo por bit baja; <strong>disminuye</strong> la velocidad de acceso.</p>"
+  },
+  {
+    id: 30, topic: "Tema 2", tag: "tema2",
+    q: "Que algoritmos de asignacion de memoria existen? (First Fit, Best Fit, Worst Fit)",
+    a: "<strong>Algoritmos de Asignacion de Memoria</strong> (para particionamiento dinamico):<br><br><ul><li><strong>First Fit (Primer ajuste):</strong> Asigna el <strong>primer</strong> hueco lo suficientemente grande. Rapido, busca desde el inicio. Tiende a acumular fragmentos al inicio.</li><li><strong>Best Fit (Mejor ajuste):</strong> Busca el hueco <strong>mas pequeno</strong> que sea suficiente. Deja los huecos mas grandes disponibles. Genera muchos fragmentos pequenos inutiles.</li><li><strong>Worst Fit (Peor ajuste):</strong> Asigna el hueco <strong>mas grande</strong> disponible. La idea es que el residuo sea lo suficientemente grande para ser util. Busca completa, costoso.</li></ul><p>En la practica, <strong>First Fit</strong> suele dar mejor rendimiento general por su velocidad.</p>"
+  },
+  {
+    id: 31, topic: "Extra", tag: "extra",
+    q: "(Extra) Mencionar el nombre del Ingeniero que imparte la materia de Sistemas Operativos",
+    a: "<strong>Ing. Angel Isidro Mercado</strong><br><br>Imparte la materia de Sistemas Operativos en la <strong>Facultad de Ingenieria de la UNAM</strong>, Grupo 01."
+  },
+  {
+    id: 32, topic: "Extra", tag: "extra",
+    q: "(Extra) Escribe una opinion personal acerca de la materia de Sistemas Operativos",
+    a: "<strong>Esta es una pregunta de opinion personal.</strong><br><br>Sugerencia de respuesta:<br><br>La materia de Sistemas Operativos es fundamental para comprender como funciona una computadora a nivel interno. Permite entender la administracion de recursos (CPU, memoria, dispositivos), la evolucion historica de la computacion y la importancia de conceptos como la gestion de memoria, los procesos y la seguridad. Es una materia que conecta la teoria con la practica y es esencial para cualquier ingeniero en computacion."
+  }
+];
+
+let cards = [...allCards];
+let currentIndex = 0;
+let isFlipped = false;
+let correct = new Set();
+let incorrect = new Set();
+let currentFilter = 'all';
+
+function updateCard() {
+  if (cards.length === 0) {
+    showSummary();
+    return;
+  }
+  const c = cards[currentIndex];
+  document.getElementById('cardNum').textContent = `PREGUNTA ${c.id} / 32`;
+  document.getElementById('cardNumBack').textContent = `RESPUESTA ${c.id}`;
+  document.getElementById('cardTopic').textContent = c.topic;
+  document.getElementById('cardQuestion').textContent = c.q;
+  document.getElementById('cardAnswer').innerHTML = c.a;
+  document.getElementById('counter').textContent = `${currentIndex + 1} / ${cards.length}`;
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+  document.getElementById('nextBtn').disabled = currentIndex >= cards.length - 1;
+  document.getElementById('progress').style.width =
+    `${((correct.size + incorrect.size) / allCards.length) * 100}%`;
+  document.getElementById('correctCount').textContent = correct.size;
+  document.getElementById('incorrectCount').textContent = incorrect.size;
+  document.getElementById('remainingCount').textContent =
+    allCards.length - correct.size - incorrect.size;
+
+  if (isFlipped) {
+    document.getElementById('card').classList.remove('flipped');
+    isFlipped = false;
+  }
+}
+
+function flipCard() {
+  document.getElementById('card').classList.toggle('flipped');
+  isFlipped = !isFlipped;
+}
+
+function nextCard() {
+  if (currentIndex < cards.length - 1) {
+    currentIndex++;
+    updateCard();
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    updateCard();
+  }
+}
+
+function markCorrect() {
+  if (cards.length === 0) return;
+  const c = cards[currentIndex];
+  correct.add(c.id);
+  incorrect.delete(c.id);
+  if (currentIndex < cards.length - 1) nextCard();
+  else updateCard();
+  checkComplete();
+}
+
+function markIncorrect() {
+  if (cards.length === 0) return;
+  const c = cards[currentIndex];
+  incorrect.add(c.id);
+  correct.delete(c.id);
+  if (currentIndex < cards.length - 1) nextCard();
+  else updateCard();
+  checkComplete();
+}
+
+function checkComplete() {
+  if (correct.size + incorrect.size === cards.length) {
+    showSummary();
+  }
+}
+
+function showSummary() {
+  const pct = Math.round((correct.size / allCards.length) * 100);
+  document.getElementById('finalScore').textContent = `${pct}%`;
+  document.getElementById('finalScore').className =
+    `score ${pct >= 80 ? 'good' : pct >= 60 ? 'ok' : 'bad'}`;
+  document.getElementById('finalMsg').textContent =
+    pct >= 80 ? 'Excelente! Estas listo para el examen.' :
+    pct >= 60 ? 'Vas bien, repasa las incorrectas.' :
+    'Necesitas estudiar mas. Repasa todas las tarjetas.';
+  document.getElementById('summary').style.display = 'block';
+}
+
+function shuffleCards() {
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  currentIndex = 0;
+  updateCard();
+}
+
+function resetAll() {
+  correct.clear();
+  incorrect.clear();
+  cards = filterCards();
+  currentIndex = 0;
+  document.getElementById('summary').style.display = 'none';
+  updateCard();
+}
+
+function filterCards() {
+  if (currentFilter === 'all') return [...allCards];
+  return allCards.filter(c => c.tag === currentFilter);
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  cards = filterCards();
+  currentIndex = 0;
+  document.getElementById('summary').style.display = 'none';
+  updateCard();
+}
+
+function showOnlyWrong() {
+  if (incorrect.size === 0) return;
+  cards = allCards.filter(c => incorrect.has(c.id));
+  currentIndex = 0;
+  document.getElementById('summary').style.display = 'none';
+  updateCard();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); flipCard(); }
+  if (e.code === 'ArrowRight') nextCard();
+  if (e.code === 'ArrowLeft') prevCard();
+  if (e.code === 'KeyC') markCorrect();
+  if (e.code === 'KeyX') markIncorrect();
+});
+
+updateCard();
+</script>
+</body>
+</html>
