@@ -1,0 +1,445 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2cm]{geometry}
+\usepackage[dvipsnames,table]{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{needspace}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{acento}{HTML}{C2562D}
+\definecolor{acento2}{HTML}{2F5D8A}
+\definecolor{suave}{HTML}{FBF3EE}
+\definecolor{aviso}{HTML}{B7791F}
+
+\hypersetup{pdftitle={Sistemas Operativos - Resumen Primer Parcial}}
+
+\titleformat{\section}{\Large\bfseries\color{acento}}{\thesection}{0.6em}{}[\vspace{-0.4em}{\color{acento}\rule{\linewidth}{0.8pt}}]
+\titleformat{\subsection}{\large\bfseries\color{acento2}}{\thesubsection}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{1.1em}{0.4em}
+
+\setlist{itemsep=2pt,topsep=4pt,leftmargin=1.4em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{gray}Sistemas Operativos --- Primer Parcial}
+\fancyhead[R]{\small\color{gray}FI UNAM}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\newtcolorbox{truco}{colback=suave,colframe=acento,boxrule=0.6pt,arc=2pt,
+  left=6pt,right=6pt,top=3pt,bottom=3pt,fonttitle=\bfseries,
+  title={Truco para recordar},coltitle=white}
+\newtcolorbox{nota}{colback=acento2!6,colframe=acento2,boxrule=0.6pt,arc=2pt,
+  left=6pt,right=6pt,top=3pt,bottom=3pt}
+\newtcolorbox{aviso}{colback=aviso!8,colframe=aviso,boxrule=0.8pt,arc=2pt,
+  left=6pt,right=6pt,top=3pt,bottom=3pt,fonttitle=\bfseries,
+  title={Revisa con tus apuntes},coltitle=white}
+
+\newcommand{\clave}[1]{\textbf{\color{acento}#1}}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\color{acento}\rule{\linewidth}{1.5pt}}\\[0.8cm]
+  {\Huge\bfseries Sistemas Operativos\\[0.3cm]}
+  {\LARGE Resumen para el Primer Parcial\\[0.5cm]}
+  {\color{acento}\rule{\linewidth}{1.5pt}}\\[1.2cm]
+  {\large Tema 1: Introducción a los Sistemas Operativos\\[0.2cm]
+   Tema 2: Administración de Memoria\\[2cm]}
+  {\large Ing. Ángel Isidro Mercado\\[0.2cm]
+   Facultad de Ingeniería, UNAM --- Grupo 01}
+  \vfill
+  {\small\color{gray}Los datos clave aparecen en \clave{color} para que sea fácil convertirlos en flashcards.}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%=====================================================================
+\section{Tema 1: Introducción a los Sistemas Operativos}
+%=====================================================================
+
+\subsection{¿Qué es un Sistema Operativo?}
+Es el \clave{conjunto de programas que funciona como intermediario entre el usuario y el hardware}.
+Administra los recursos de la computadora (CPU, memoria, dispositivos de entrada y salida, almacenamiento)
+y da una plataforma para que funcionen las aplicaciones. Oculta la complejidad del hardware: el usuario
+no necesita saber cómo funciona el disco para guardar un archivo.
+
+\subsection{Funciones del Sistema Operativo}
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{5.2cm}L}
+\toprule
+Función & Qué hace \\
+\midrule
+Administración de procesos & Crear, planificar, ejecutar y terminar programas en ejecución \\
+Administración de memoria & Asignar y liberar memoria a cada proceso \\
+Administración de E/S & Controlar teclado, pantalla, impresora, etc. \\
+Administración de archivos & Crear, leer, escribir y organizar archivos y carpetas \\
+Seguridad y protección & Controlar quién accede a qué \\
+Interfaz de usuario & Por comandos (CLI) o gráfica (GUI) \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Clasificación de los Sistemas Operativos}
+\begin{itemize}
+  \item \textbf{Por número de usuarios:} monousuario / multiusuario
+  \item \textbf{Por número de tareas:} monotarea / multitarea
+  \item \textbf{Por número de procesadores:} monoprocesador / multiprocesador
+  \item \textbf{Por forma de respuesta:} por lotes (batch), tiempo compartido, tiempo real
+  \item \textbf{Por estructura:} monolítico, por capas, microkernel, máquina virtual
+\end{itemize}
+\begin{nota}
+\textbf{Ejemplos:} MS-DOS es monousuario y monotarea; UNIX, Linux y Windows son multiusuario y multitarea.
+\end{nota}
+
+\subsection{UNIX}
+\begin{itemize}
+  \item \textbf{Año de creación:} \clave{1969}
+  \item \textbf{Lugar:} \clave{Laboratorios Bell (AT\&T)}
+  \item \textbf{Creadores:} \clave{Ken Thompson y Dennis Ritchie}
+  \item Primero se escribió en ensamblador y después se reescribió en \clave{lenguaje C}, lo que lo hizo \textbf{portable}.
+\end{itemize}
+
+\textbf{Características (aprende al menos 5):}
+\begin{enumerate}
+  \item \clave{Multitarea:} ejecuta varios procesos al mismo tiempo.
+  \item \clave{Multiusuario:} varios usuarios trabajan a la vez.
+  \item \clave{Seguro:} sistema de permisos y control de acceso.
+  \item \clave{Estable:} puede funcionar mucho tiempo sin reiniciarse.
+  \item \clave{Robusto:} resiste fallos.
+  \item \textbf{Extra:} portable y con un sistema de archivos jerárquico (en forma de árbol).
+\end{enumerate}
+
+\subsection{Sistemas Operativos para dispositivos móviles}
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{3.4cm}>{\raggedright}p{3.6cm}L}
+\toprule
+Sistema & Empresa & Nota \\
+\midrule
+Android & Google & Basado en el kernel de Linux; el más usado \\
+iOS & Apple & Solo funciona en iPhone y iPad \\
+Symbian & Nokia & Descontinuado \\
+BlackBerry OS & RIM (BlackBerry) & Descontinuado \\
+Windows Phone & Microsoft & Descontinuado \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Generaciones de las computadoras}
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{2.9cm}>{\raggedright}p{3.9cm}L}
+\toprule
+Generación & Tecnología & Datos clave \\
+\midrule
+1a (1946--1958) & \clave{Tubos de vacío (bulbos)} & Enormes, lentas, se calentaban mucho. ENIAC, UNIVAC. Tarjetas perforadas \\
+2a (1959--1964) & \clave{Transistores} & Más pequeñas y confiables. Lenguajes COBOL y FORTRAN \\
+3a (1964--1971) & \clave{Circuitos integrados} & Multiprogramación. IBM 360 \\
+4a (1971--hoy) & \clave{Microprocesador} & Computadoras personales, interfaz gráfica, redes. Intel 4004 \\
+5a (actual) & \clave{Inteligencia artificial} & Procesamiento en paralelo, lenguaje natural \\
+\bottomrule
+\end{tabularx}
+\vspace{2pt}{\small\color{gray}Las fechas cambian un poco según la fuente; si tu presentación trae otras, usa esas.}
+\begin{truco}
+\textbf{B -- T -- C -- M -- IA}: Bulbos, Transistores, Circuitos, Microprocesador, Inteligencia Artificial.
+\end{truco}
+
+\subsection{Steve Jobs y Apple}
+\begin{itemize}
+  \item \textbf{Nombre completo:} \clave{Steven Paul Jobs} (1955--2011).
+  \item \textbf{Fundó Apple en} \clave{1976} (1 de abril) con \textbf{Steve Wozniak} y \textbf{Ronald Wayne}, en el garaje de su casa en California.
+\end{itemize}
+
+\needspace{12\baselineskip}
+\textbf{Línea del tiempo:}\par
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{1.4cm}L}
+\toprule
+1976 & Apple I \\
+1977 & Apple II \\
+1984 & \clave{Macintosh}: la primera computadora personal exitosa con interfaz gráfica y ratón \\
+1985 & Lo sacan de Apple; funda \textbf{NeXT} y compra \textbf{Pixar} \\
+1997 & Regresa a Apple \\
+1998 & iMac \\
+2001 & \clave{iPod} \\
+2007 & \clave{iPhone} \\
+2010 & iPad \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Tres productos para el examen:}
+\begin{itemize}
+  \item \clave{Macintosh (1984):} revolucionó la computación personal con su interfaz gráfica.
+  \item \clave{iPod (2001):} cambió la industria de la música junto con iTunes.
+  \item \clave{iPhone (2007):} redefinió el teléfono celular con su pantalla táctil y las apps.
+\end{itemize}
+
+\subsection{Microsoft y la evolución de Windows}
+Microsoft fue fundada en \clave{1975} por \clave{Bill Gates y Paul Allen}. Su primer gran producto fue \textbf{MS-DOS}.
+
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{3.4cm}>{\raggedright}p{2.2cm}L}
+\toprule
+Versión & Año & Qué la distingue \\
+\midrule
+Windows 1.0 & 1985 & Interfaz gráfica que funcionaba encima de MS-DOS \\
+Windows 3.1 & 1992 & Primer gran éxito \\
+Windows 95 & 1995 & Aparecen el \clave{botón Inicio} y la \clave{barra de tareas} \\
+Windows 98 / ME & 1998 / 2000 & Mejoras de Windows 95 \\
+Windows XP & 2001 & Muy estable y popular (basado en NT) \\
+Windows Vista & 2007 & Mal recibido \\
+Windows 7 & 2009 & Corrigió los problemas de Vista \\
+Windows 8 / 8.1 & 2012 / 2013 & Interfaz de mosaicos; quitó el botón Inicio \\
+Windows 10 & 2015 & Regresa el menú Inicio \\
+Windows 11 & 2021 & Barra de tareas centrada; exige TPM 2.0 \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Versiones para servidor:} Windows Server 2003, 2008, 2012, 2016, 2019 y 2022.
+
+\subsection{Software libre vs.\ software de licencia (patente)}
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{3.6cm}LL}
+\toprule
+ & Software libre & Software de licencia (propietario) \\
+\midrule
+Código fuente & \clave{Disponible} & \clave{Cerrado} \\
+Modificar y redistribuir & Sí & No, sin autorización \\
+Costo & Normalmente gratis & Normalmente se paga una licencia \\
+Ejemplos & Linux, LibreOffice, Firefox & Windows, Microsoft Office, Photoshop \\
+\bottomrule
+\end{tabularx}
+\begin{nota}
+Las \textbf{4 libertades} del software libre: \textbf{usar, estudiar, distribuir y mejorar}.
+\end{nota}
+
+\subsection{Distribuciones de Linux}
+\begin{itemize}
+  \item \clave{Ubuntu:} basada en Debian, fácil de usar (empresa Canonical).
+  \item \clave{Fedora:} patrocinada por Red Hat, siempre con tecnología reciente.
+  \item \clave{Debian:} de las más antiguas y estables; muchas distribuciones se basan en ella.
+  \item \clave{OpenSuSE:} de origen alemán; se configura con YaST.
+  \item \clave{Slackware:} de las primeras distribuciones, para usuarios avanzados.
+  \item \textbf{Otras:} Linux Mint, Arch, CentOS, Kali. \textbf{Android} también usa el kernel de Linux.
+\end{itemize}
+
+\subsection{Sistema distribuido}
+Es un conjunto de \clave{computadoras independientes conectadas en red} que trabajan juntas y
+\clave{para el usuario parecen un solo sistema}.
+
+\textbf{Características:} comparten recursos, son \textbf{transparentes} (el usuario no nota la distribución),
+\textbf{toleran fallos}, son \textbf{escalables} y se comunican por \textbf{paso de mensajes}.
+\textbf{Ejemplos:} la nube, Google, clusters.
+
+\subsection{Máquina virtual}
+Es una \clave{computadora simulada por software} que permite ejecutar un sistema operativo completo
+\textbf{dentro de otro} (el sistema anfitrión).
+\begin{itemize}
+  \item \textbf{De sistema:} VirtualBox, VMware, Hyper-V.
+  \item \textbf{De proceso:} la JVM de Java.
+  \item \textbf{Ventajas:} aislamiento, pruebas seguras, varios sistemas operativos en un mismo equipo.
+\end{itemize}
+
+\newpage
+%=====================================================================
+\section{Tema 2: Administración de Memoria}
+%=====================================================================
+
+\subsection{¿Qué es la memoria? Tipos}
+Es el dispositivo que \clave{almacena datos e instrucciones}, de forma temporal o permanente.
+
+\begin{tabularx}{\linewidth}{LL}
+\toprule
+\textbf{Memoria primaria (interna)} & \textbf{Memoria secundaria (externa)} \\
+\midrule
+Registros & Disco duro (HDD) \\
+Caché & SSD \\
+RAM & USB \\
+ROM & Cintas magnéticas, discos flexibles \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Jerarquía de memoria}
+\begin{center}
+\Large\textbf{Registros} $\rightarrow$ \textbf{Caché} $\rightarrow$ \textbf{RAM} $\rightarrow$ \textbf{Disco}
+\end{center}
+\begin{itemize}
+  \item Hacia la izquierda: \textbf{más rápida, más cara y más pequeña}.
+  \item Hacia la derecha: \textbf{más lenta, más barata y más grande}.
+\end{itemize}
+
+\subsection{Memoria RAM (Random Access Memory)}
+\begin{itemize}
+  \item \clave{Volátil:} pierde todo al apagarse la computadora.
+  \item Se puede \textbf{leer y escribir}.
+  \item \textbf{Acceso aleatorio:} llega directo a cualquier posición.
+  \item Trabaja con la CPU a través del \clave{bus de datos} y el \clave{bus de direcciones}.
+  \item Guarda los \textbf{programas y datos que se están ejecutando}.
+\end{itemize}
+
+\subsection{DDR, DDR2, DDR3, DDR4 y DDR5}
+\begin{center}
+\begin{tabular}{>{\bfseries}lcc}
+\toprule
+Tipo & Voltaje & Pines \\
+\midrule
+DDR  & \clave{2.5 V} & 184 \\
+DDR2 & \clave{1.8 V} & 240 \\
+DDR3 & \clave{1.5 V} & 240 \\
+DDR4 & \clave{1.2 V} & 288 \\
+DDR5 & \clave{1.1 V} & 288 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Regla:} cada generación gasta \textbf{menos voltaje} y es \textbf{más rápida} y de \textbf{mayor capacidad}.
+\textbf{No son compatibles entre sí}, porque la muesca del módulo está en otro lugar.
+\begin{truco}
+Los voltajes van bajando: \textbf{2.5 $\rightarrow$ 1.8 $\rightarrow$ 1.5 $\rightarrow$ 1.2 $\rightarrow$ 1.1}.
+\end{truco}
+
+\subsection{Memoria ROM (Read Only Memory)}
+\begin{itemize}
+  \item \clave{No volátil:} conserva la información sin energía.
+  \item De \textbf{solo lectura}.
+  \item Guarda el \clave{BIOS} (el firmware que arranca la computadora) y las \textbf{características del sistema}.
+  \item \textbf{Tipos:} PROM (se programa una sola vez), EPROM (se borra con luz ultravioleta),
+        EEPROM / Flash (se borra eléctricamente).
+\end{itemize}
+\begin{nota}
+\textbf{RAM vs.\ ROM:} la RAM es volátil y se lee y escribe; la ROM no es volátil y solo se lee.
+\end{nota}
+
+\subsection{Memoria caché}
+\begin{itemize}
+  \item Memoria auxiliar de \clave{muy alta velocidad} que está \clave{entre la CPU y la RAM}.
+  \item Guarda copias de los \textbf{datos que se usan más seguido} para que la CPU no tenga que esperar a la RAM.
+  \item \textbf{Niveles:} L1 (la más rápida y pequeña), L2 y L3 (la más grande, compartida entre núcleos).
+\end{itemize}
+
+\subsection{Memoria virtual (swap)}
+Es un \clave{espacio del disco duro que se usa como si fuera RAM} cuando la RAM se llena.
+\begin{itemize}
+  \item \textbf{Mínimo:} \clave{igual al tamaño de la RAM (1x)}.
+  \item \textbf{Recomendado:} \clave{el doble de la RAM (2x)}.
+  \item \textbf{Ejemplo:} con 8 GB de RAM $\rightarrow$ mínimo 8 GB, recomendado 16 GB.
+  \item \textbf{Desventaja:} el disco es mucho más lento que la RAM, así que si se usa mucho el swap la computadora se vuelve lenta.
+\end{itemize}
+
+\subsection{Asignación contigua}
+Cada proceso se carga en \clave{un solo bloque continuo} de memoria, sin partes separadas.
+Formas de hacerlo: \textbf{partición única}, \textbf{particiones estáticas (fijas)} o \textbf{particiones dinámicas}.
+
+\subsection{Particionamiento estático vs.\ dinámico}
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{3.2cm}LL}
+\toprule
+ & Estático (fijo) & Dinámico \\
+\midrule
+Cuándo se crean & Al \textbf{arrancar el sistema}, con tamaño fijo & Al \textbf{cargar cada proceso}, del tamaño exacto que necesita \\
+Fragmentación & \clave{INTERNA} & \clave{EXTERNA} \\
+Ventaja & Sencillo, poco trabajo para el SO & Aprovecha mejor la memoria \\
+Desventaja & Desperdicia espacio; número fijo de procesos & Deja huecos pequeños; necesita compactación \\
+Colas & Una por partición (colas múltiples) o una cola única & --- \\
+\bottomrule
+\end{tabularx}
+\begin{truco}
+\textbf{Estático $\rightarrow$ Interna} \qquad \textbf{Dinámico $\rightarrow$ Externa}
+\end{truco}
+
+\subsection{Fragmentación}
+\begin{itemize}
+  \item \clave{Interna:} espacio desperdiciado \textbf{dentro} de una partición porque el proceso es más chico que ella.\\
+        \emph{Ejemplo: una partición de 10 MB con un proceso de 7 MB desperdicia 3 MB.}
+  \item \clave{Externa:} en total sí hay memoria libre suficiente, pero está \textbf{repartida en huecos pequeños que no están juntos}.\\
+        \emph{Ejemplo: hay tres huecos de 3 MB (9 MB libres), pero un proceso de 8 MB no cabe en ninguno.}
+\end{itemize}
+
+\subsection{Compactación}
+Consiste en \clave{mover los procesos para juntar todos los huecos libres en un solo bloque}.
+Resuelve la \textbf{fragmentación externa}, pero \textbf{tarda mucho}, porque hay que detener y reubicar los procesos.
+
+\subsection{Algoritmos de asignación (particionamiento dinámico)}
+\begin{tabularx}{\linewidth}{>{\raggedright\bfseries}p{4.2cm}L}
+\toprule
+Algoritmo & Cómo elige el hueco \\
+\midrule
+First Fit (primer ajuste) & El \clave{primer} hueco donde quepa el proceso; es el más rápido \\
+Best Fit (mejor ajuste) & El hueco \clave{más pequeño} donde quepa; deja huecos diminutos que ya no sirven \\
+Worst Fit (peor ajuste) & El hueco \clave{más grande}; lo que sobra todavía sirve para otro proceso \\
+\bottomrule
+\end{tabularx}
+
+\begin{aviso}
+Las secciones de \textbf{paginación}, \textbf{segmentación} y \textbf{algoritmos de reemplazo} están escritas
+con conceptos generales de la materia, no con las diapositivas del curso. Compáralas con tus apuntes.
+\end{aviso}
+
+\subsection{Paginación}
+\begin{itemize}
+  \item La memoria física se divide en \clave{marcos} y el proceso en \clave{páginas}, todos del \textbf{mismo tamaño fijo}.
+  \item Las páginas se colocan en cualquier marco libre, \textbf{sin necesidad de que estén juntas}.
+  \item La \clave{tabla de páginas} indica en qué marco está cada página.
+  \item Dirección lógica = \textbf{número de página + desplazamiento}.
+  \item \textbf{Elimina la fragmentación externa}, aunque puede quedar un poco de interna en la última página.
+\end{itemize}
+
+\subsection{Segmentación}
+\begin{itemize}
+  \item El proceso se divide en \clave{segmentos de tamaño variable} que siguen su estructura lógica: \textbf{código, datos y pila}.
+  \item La \clave{tabla de segmentos} guarda la \textbf{base} (dónde empieza cada segmento) y el \textbf{límite} (cuánto mide).
+  \item Produce \textbf{fragmentación externa}.
+\end{itemize}
+\begin{nota}
+\textbf{Paginación vs.\ segmentación:} la paginación usa bloques de \textbf{tamaño fijo} y genera fragmentación
+\textbf{interna}; la segmentación usa bloques de \textbf{tamaño variable} y genera fragmentación \textbf{externa}.
+\end{nota}
+
+\subsection{Algoritmos de reemplazo de páginas}
+Se usan cuando la memoria está llena y hay que sacar una página para meter otra.
+\begin{itemize}
+  \item \clave{FIFO:} saca la página que \textbf{llegó primero}, es decir, la más antigua. Puede presentar la
+        \textbf{anomalía de Belady} (más marcos pueden producir más fallos).
+  \item \clave{LRU:} saca la página que lleva \textbf{más tiempo sin usarse}.
+  \item \clave{Óptimo:} saca la página que \textbf{tardará más en volver a usarse}. Es el mejor, pero
+        \textbf{no se puede implementar} porque necesitaría conocer el futuro; solo sirve como referencia.
+\end{itemize}
+
+%=====================================================================
+\section{Preguntas extra del examen}
+%=====================================================================
+\begin{itemize}
+  \item \textbf{Profesor:} \clave{Ing. Ángel Isidro Mercado}, Facultad de Ingeniería, UNAM, grupo 01.
+  \item \textbf{Opinión personal:} prepara 3 o 4 líneas propias. Por ejemplo: por qué te sirve entender cómo se
+        administran los recursos, qué tema te gustó más y cómo se relaciona con tu carrera.
+\end{itemize}
+
+%=====================================================================
+\section{Cómo convertir esto en flashcards}
+%=====================================================================
+\begin{itemize}
+  \item \textbf{Una idea por tarjeta.} Mejor ``¿En qué año se creó UNIX?'' y ``¿Quién creó UNIX?'' por separado
+        que una sola tarjeta con todo.
+  \item \textbf{Las tablas dan varias tarjetas cada una.} Por ejemplo, de la tabla DDR:
+        ``¿Voltaje de la DDR3?'' $\rightarrow$ 1.5 V.
+  \item \textbf{Tarjetas de comparación:} ``¿Qué fragmentación produce el particionamiento estático?'' $\rightarrow$ interna.
+  \item Cuando las tengas, pásalas al formato JSON que acepta Mnemo y usa \textbf{Importar mazo desde JSON}:
+\end{itemize}
+\begin{tcolorbox}[colback=gray!5,colframe=gray!50,boxrule=0.5pt,arc=2pt]
+\small\ttfamily
+\{\\
+\hspace*{1em}"name": "Sistemas Operativos",\\
+\hspace*{1em}"cards": [\\
+\hspace*{2em}\{ "front": "¿En qué año se creó UNIX?", "back": "1969" \}\\
+\hspace*{1em}]\\
+\}
+\end{tcolorbox}
+
+\end{document}
